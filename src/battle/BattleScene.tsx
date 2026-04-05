@@ -80,13 +80,13 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
         fainted: false,
       }
 
-      if (side === 'p1') { p1 = state; p1Team.activeName = name }
-      else { p2 = state; p2Team.activeName = name }
+      if (side === 'p1') { p1 = state; p1Team.activeName = species }
+      else { p2 = state; p2Team.activeName = species }
 
-      // Track in team roster
+      // Track in team roster — use species as key to match |poke| entries
       const team = side === 'p1' ? p1Team : p2Team
       const hpPercent = maxHp > 0 ? Math.round((hp / maxHp) * 100) : 100
-      team.members.set(name, { name, fainted: false, hpPercent })
+      team.members.set(species, { name: species, fainted: hp === 0, hpPercent })
     }
 
     if (type === '-damage' || type === '-heal') {
@@ -106,7 +106,7 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
         const team = side === 'p1' ? p1Team : p2Team
         const effectiveMax = maxHp || target.maxHp
         const hpPercent = effectiveMax > 0 ? Math.round((hp / effectiveMax) * 100) : 0
-        const member = team.members.get(target.name)
+        const member = team.members.get(target.species)
         if (member) {
           member.hpPercent = hpPercent
           member.fainted = hp === 0
@@ -123,7 +123,7 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
         target.fainted = true
 
         const team = side === 'p1' ? p1Team : p2Team
-        const member = team.members.get(target.name)
+        const member = team.members.get(target.species)
         if (member) {
           member.fainted = true
           member.hpPercent = 0
