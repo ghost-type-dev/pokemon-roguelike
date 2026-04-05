@@ -37,13 +37,14 @@ need_cmd ssh
 need_cmd scp
 
 SSH_OPTS=(-o StrictHostKeyChecking=no -p "$DEPLOY_PORT")
+SCP_OPTS=(-o StrictHostKeyChecking=no -P "$DEPLOY_PORT")
 SSH_CMD=(ssh "${SSH_OPTS[@]}")
-SCP_CMD=(scp "${SSH_OPTS[@]}")
+SCP_CMD=(scp "${SCP_OPTS[@]}")
 
 if [[ -n "$DEPLOY_PASSWORD" ]]; then
   need_cmd sshpass
   SSH_CMD=(sshpass -p "$DEPLOY_PASSWORD" ssh "${SSH_OPTS[@]}")
-  SCP_CMD=(sshpass -p "$DEPLOY_PASSWORD" scp "${SSH_OPTS[@]}")
+  SCP_CMD=(sshpass -p "$DEPLOY_PASSWORD" scp "${SCP_OPTS[@]}")
 fi
 
 echo "Building frontend..."
