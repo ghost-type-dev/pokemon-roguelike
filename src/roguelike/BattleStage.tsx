@@ -31,6 +31,7 @@ export function BattleStage() {
   const round = useRoguelikeStore((s) => s.round)
   const aiDifficulty = useRoguelikeStore((s) => s.aiDifficulty)
   const onBattleFinished = useRoguelikeStore((s) => s.onBattleFinished)
+  const pendingOpponentTeam = useRoguelikeStore((s) => s.pendingOpponentTeam)
 
   const battleStatus = useBattleStore((s) => s.status)
   const winner = useBattleStore((s) => s.winner)
@@ -46,9 +47,14 @@ export function BattleStage() {
     let cancelled = false
 
     async function startBattle() {
-      // Generate AI team
-      const aiTeam = generateAITeam(round)
-      const aiTeamWithMoves = await fillAIMoves(aiTeam, round)
+      // Reuse the pending opponent team on retry, otherwise generate a new one
+      let aiTeamWithMoves: PokemonSet[]
+      if (pendingOpponentTeam && pendingOpponentTeam.length > 0) {
+        aiTeamWithMoves = pendingOpponentTeam
+      } else {
+        const aiTeam = generateAITeam(round)
+        aiTeamWithMoves = await fillAIMoves(aiTeam, round)
+      }
       if (cancelled) return
 
       setOpponentTeam(aiTeamWithMoves)

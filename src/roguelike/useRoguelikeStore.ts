@@ -27,6 +27,8 @@ interface Snapshot {
   lastOpponentTeam: PokemonSet[]
 }
 
+/** Stored opponent team to replay on retry after a loss */
+
 interface RoguelikeState {
   phase: RoguelikePhase
   round: number
@@ -41,6 +43,8 @@ interface RoguelikeState {
   roundsWon: number
   /** State before reward was applied — used to retry on loss */
   preRewardSnapshot: Snapshot | null
+  /** Opponent team to reuse on retry after a loss */
+  pendingOpponentTeam: PokemonSet[] | null
 
   // Actions
   startNewRun: (aiDifficulty: 'random' | 'smart') => void
@@ -75,6 +79,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
   lastOpponentTeam: [],
   roundsWon: 0,
   preRewardSnapshot: null,
+  pendingOpponentTeam: null,
 
   startNewRun: async (aiDifficulty) => {
     const speciesNames = generateInitialDraftPicks([], 6, 330)
@@ -93,6 +98,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
       lastOpponentTeam: [],
       roundsWon: 0,
       preRewardSnapshot: null,
+      pendingOpponentTeam: null,
     })
     // Fill moves async then update
     const withMoves = await fillAIMoves(draftSets)
@@ -205,6 +211,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
           phase: 'game-over',
           roundsWon: newRoundsWon,
           lastOpponentTeam: opponentTeam,
+          pendingOpponentTeam: null,
         })
       } else {
         const rewards = generateRewardOptions(s.round, s.roster, opponentTeam, s.inventory)
@@ -212,6 +219,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
           phase: 'reward',
           roundsWon: newRoundsWon,
           lastOpponentTeam: opponentTeam,
+          pendingOpponentTeam: null,
           rewardOptions: rewards,
           // Save snapshot so we can retry from this reward screen on loss
           preRewardSnapshot: {
@@ -225,23 +233,13 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
         })
       }
     } else {
-      // On loss: restore to last reward screen if available, otherwise game over
-      const s = get()
-      if (s.preRewardSnapshot) {
-        const snap = s.preRewardSnapshot
-        set({
-          phase: 'reward',
-          roster: snap.roster,
-          inventory: snap.inventory,
-          round: snap.round,
-          roundsWon: snap.roundsWon,
-          rewardOptions: snap.rewardOptions,
-          lastOpponentTeam: snap.lastOpponentTeam,
-        })
-      } else {
-        // Round 1 — no prior reward, game over
-        set({ phase: 'game-over', lastOpponentTeam: opponentTeam })
-      }
+      // On loss: go back to prepare so the player can adjust, then retry
+      // with the exact same opponent team
+      set({
+        phase: 'prepare',
+        lastOpponentTeam: opponentTeam,
+        pendingOpponentTeam: opponentTeam,
+      })
     }
     get().saveRun()
   },
@@ -350,6 +348,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
         rewardOptions: s.rewardOptions,
         lastOpponentTeam: s.lastOpponentTeam,
         roundsWon: s.roundsWon,
+        pendingOpponentTeam: s.pendingOpponentTeam,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     } catch (e) {
@@ -385,6 +384,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
       rewardOptions: s.rewardOptions,
       lastOpponentTeam: s.lastOpponentTeam,
       roundsWon: s.roundsWon,
+      pendingOpponentTeam: s.pendingOpponentTeam,
     }
     const json = JSON.stringify(data, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
@@ -422,6 +422,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
       lastOpponentTeam: [],
       roundsWon: 0,
       preRewardSnapshot: null,
+      pendingOpponentTeam: null,
     })
     localStorage.removeItem(STORAGE_KEY)
   },

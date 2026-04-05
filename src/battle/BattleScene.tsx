@@ -33,8 +33,8 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
   let p1: PokemonState | null = null
   let p2: PokemonState | null = null
 
-  const p1Team: TeamOverview = { size: 6, members: new Map(), activeName: null }
-  const p2Team: TeamOverview = { size: 6, members: new Map(), activeName: null }
+  const p1Team: TeamOverview = { size: 0, members: new Map(), activeName: null }
+  const p2Team: TeamOverview = { size: 0, members: new Map(), activeName: null }
 
   for (const event of events) {
     const line = event.data
@@ -45,7 +45,7 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
 
     if (type === 'teamsize') {
       const player = parts[1]?.trim()
-      const size = parseInt(parts[2]) || 6
+      const size = parseInt(parts[2]) || 0
       if (player === 'p1') p1Team.size = size
       else if (player === 'p2') p2Team.size = size
     }
@@ -145,6 +145,10 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
       if (target) target.status = ''
     }
   }
+
+  // If |teamsize| was never received, derive size from |poke| entries
+  if (p1Team.size === 0) p1Team.size = p1Team.members.size
+  if (p2Team.size === 0) p2Team.size = p2Team.members.size
 
   return { p1, p2, p1Team, p2Team }
 }
