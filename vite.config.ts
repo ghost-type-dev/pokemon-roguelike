@@ -26,8 +26,10 @@ function fileProtocolPlugin(): Plugin {
     generateBundle(_options, bundle) {
       for (const [, chunk] of Object.entries(bundle)) {
         if (chunk.type === 'chunk' && chunk.isEntry) {
-          // Strip ESM export statements (invalid in classic scripts) and wrap in IIFE
-          const stripped = chunk.code.replace(/export\{[^}]*\};?/g, '')
+          // Strip ESM syntax invalid in classic scripts and wrap in IIFE
+          let stripped = chunk.code.replace(/export\{[^}]*\};?/g, '')
+          // Replace import.meta.url with a file:// compatible fallback
+          stripped = stripped.replace(/import\.meta\.url/g, 'undefined')
           chunk.code = `(function(){\n${stripped}\n})();`
         }
       }
