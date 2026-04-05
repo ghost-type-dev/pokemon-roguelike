@@ -1,0 +1,136 @@
+import { useEffect, useRef, useState } from 'react'
+import { Teams } from '@pkmn/sim'
+import { BattleScene } from '../battle/BattleScene'
+import { MovePanel } from '../battle/MovePanel'
+import { TeamPanel } from '../battle/TeamPanel'
+import { BattleLog } from '../battle/BattleLog'
+import { useBattleStore } from '../battle/useBattleStore'
+import { battleManager } from '../engine/BattleManager'
+import { useRoguelikeStore } from './useRoguelikeStore'
+import { generateAITeam, fillAIMoves, getMaxTeamSize } from './roguelike-helpers'
+import type { PokemonSet } from '../teambuilder/useTeamBuilder'
+
+function packPokemonSets(sets: PokemonSet[]): string {
+  const showdownSets = sets.filter(p => p.species).map(p => ({
+    name: p.name || p.species,
+    species: p.species,
+    item: p.item || '',
+    ability: p.ability || '',
+    moves: p.moves.filter(Boolean),
+    nature: p.nature || 'Hardy',
+    evs: { ...p.evs },
+    ivs: { ...p.ivs },
+    level: p.level || 50,
+    gender: p.gender || '',
+  }))
+  return Teams.pack(showdownSets as any)
+}
+
+export function BattleStage() {
+  const roster = useRoguelikeStore((s) => s.roster)
+  const round = useRoguelikeStore((s) => s.round)
+  const aiDifficulty = useRoguelikeStore((s) => s.aiDifficulty)
+  const onBattleFinished = useRoguelikeStore((s) => s.onBattleFinished)
+
+  const battleStatus = useBattleStore((s) => s.status)
+  const winner = useBattleStore((s) => s.winner)
+  const humanRequest = useBattleStore((s) => s.humanRequest)
+  const currentTurn = useBattleStore((s) => s.currentTurn)
+
+  const [battleStarted, setBattleStarted] = useState(false)
+  const [opponentTeam, setOpponentTeam] = useState<PokemonSet[]>([])
+  const finishedHandled = useRef(false)
+
+  // Start battle on mount
+  useEffect(() => {
+    let cancelled = false
+
+    async function startBattle() {
+      // Generate AI team
+      const aiTeam = generateAITeam(round)
+      const aiTeamWithMoves = await fillAIMoves(aiTeam, round)
+      if (cancelled) return
+
+      setOpponentTeam(aiTeamWithMoves)
+
+      // Only bring the allowed number of Pokemon for this round bracket
+      const maxSize = getMaxTeamSize(round)
+      const p1Packed = packPokemonSets(roster.slice(0, maxSize))
+      const p2Packed = packPokemonSets(aiTeamWithMoves)
+
+      battleManager.connect()
+      await battleManager.startBattleWithTeams({
+        formatId: 'gen9anythinggoes',
+        p1AI: 'human',
+        p2AI: aiDifficulty === 'smart' ? 'heuristic' : 'random',
+        p1Name: 'Player',
+        p2Name: `Round ${round} Boss`,
+        p1PackedTeam: p1Packed,
+        p2PackedTeam: p2Packed,
+      })
+
+      if (!cancelled) setBattleStarted(true)
+    }
+
+    startBattle()
+    return () => { cancelled = true }
+  }, [])
+
+  // Watch for battle end
+  useEffect(() => {
+    if (battleStarted && battleStatus === 'finished' && !finishedHandled.current) {
+      finishedHandled.current = true
+      const won = winner === 'Player'
+      // Small delay to let user see the result
+      setTimeout(() => {
+        onBattleFinished(won, opponentTeam)
+      }, 2000)
+    }
+  }, [battleStatus, battleStarted, winner])
+
+  if (!battleStarted) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-gray-400 animate-pulse">Generating opponent team...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-white">Round {round} Battle</h2>
+        <div className="flex items-center gap-3 text-sm text-gray-400">
+          {currentTurn > 0 && <span>Turn {currentTurn}</span>}
+          {humanRequest && battleStatus === 'running' && (
+            <span className="inline-flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              Your turn
+            </span>
+          )}
+          {battleStatus === 'finished' && (
+            <span className={winner === 'Player' ? 'text-green-400' : 'text-red-400'}>
+              {winner === 'Player' ? 'Victory!' : 'Defeated...'}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <BattleScene />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2">
+          <MovePanel />
+        </div>
+        <div>
+          <TeamPanel />
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold text-gray-300 mb-2">Battle Log</h3>
+        <BattleLog />
+      </div>
+    </div>
+  )
+}

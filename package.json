@@ -1,0 +1,35 @@
+{
+  "name": "pokemon-roguelike",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@pkmn/client": "^0.7.2",
+    "@pkmn/data": "^0.10.7",
+    "@pkmn/dex": "^0.10.7",
+    "@pkmn/img": "^0.3.3",
+    "@pkmn/protocol": "^0.7.2",
+    "@pkmn/randoms": "^0.10.7",
+    "@pkmn/sets": "^5.2.0",
+    "@pkmn/sim": "^0.10.7",
+    "@smogon/calc": "^0.11.0",
+    "buffer": "^6.0.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "tailwindcss": "^4.2.2",
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1"
+  }
+}
