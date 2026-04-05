@@ -303,10 +303,10 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
 
         case 'new-pokemon':
           if (reward.pokemonSpecies) {
-            // Keep the opponent's actual set (moves, EVs, nature, etc.)
+            // Keep the opponent's actual set (moves, EVs, nature, etc.) but strip held item
             const recruited = s.lastOpponentTeam.find(p => p.species === reward.pokemonSpecies)
             const newPoke = recruited
-              ? { ...recruited, evs: { ...recruited.evs }, ivs: { ...recruited.ivs }, moves: [...recruited.moves] as [string, string, string, string] }
+              ? { ...recruited, item: '', evs: { ...recruited.evs }, ivs: { ...recruited.ivs }, moves: [...recruited.moves] as [string, string, string, string] }
               : createStarterSet(reward.pokemonSpecies)
             if (roster.length < 6) {
               roster.push(newPoke)

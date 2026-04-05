@@ -133,12 +133,20 @@ export function PrepareStage() {
           {inventory.items.length > 0 && (
             <div className="mt-4">
               <h3 className="text-sm text-gray-400 font-medium mb-1">Inventory</h3>
-              <div className="flex flex-wrap gap-1">
-                {inventory.items.map((item, i) => (
-                  <span key={i} className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 rounded">
-                    {item}
-                  </span>
-                ))}
+              <div className="space-y-1">
+                {inventory.items.map((item, i) => {
+                  const holder = roster.find(p => p.item === item)
+                  const gen = getGen(9)
+                  const itemData = gen.items.get(item)
+                  const desc = itemData?.shortDesc || itemData?.desc || ''
+                  return (
+                    <div key={i} className={`text-xs px-2 py-1 rounded ${holder ? 'bg-gray-800 text-gray-500' : 'bg-gray-700 text-gray-300'}`}>
+                      <span className={holder ? 'line-through' : ''}>{item}</span>
+                      {holder && <span className="ml-1 text-gray-600">({holder.species})</span>}
+                      {desc && <div className={`mt-0.5 ${holder ? 'text-gray-600' : 'text-gray-500'}`}>{desc}</div>}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
