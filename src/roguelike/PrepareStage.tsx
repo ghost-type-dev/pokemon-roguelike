@@ -344,11 +344,14 @@ function PokemonPrepareEditor({
         <div className="space-y-2">
           {pokemon.moves.map((move, i) => {
             const md = moveDescriptions[i]
+            // Exclude moves already selected in other slots
+            const usedElsewhere = new Set(pokemon.moves.filter((m, j) => j !== i && m))
+            const availableMoves = allowedMoves.filter(m => !usedElsewhere.has(m))
             return (
               <div key={i}>
                 <MoveSelect
                   value={move}
-                  options={allowedMoves}
+                  options={availableMoves}
                   onChange={(m) => onMoveChange(slotIndex, i, m)}
                   placeholder={`Move ${i + 1}`}
                 />
