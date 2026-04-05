@@ -9,6 +9,7 @@ import {
   generateInitialDraftPicks,
   fillAIMoves,
   getEvolutionProgress,
+  getMaxTeamSize,
 } from './roguelike-helpers'
 
 export type RoguelikePhase = 'idle' | 'draft-pick' | 'prepare' | 'battle' | 'reward' | 'game-over'
@@ -204,6 +205,24 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
   onBattleFinished: (won, opponentTeam) => {
     if (won) {
       const s = get()
+      // Grant +2 EVs in each stat to every Pokemon that participated
+      const maxSize = getMaxTeamSize(s.round)
+      const statIds: StatID[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe']
+      const updatedRoster = s.roster.map((p, i) => {
+        if (i >= maxSize) return p
+        const evs = { ...p.evs }
+        const currentTotal = Object.values(evs).reduce((a, b) => a + b, 0)
+        let added = 0
+        for (const stat of statIds) {
+          const add = Math.min(2, 252 - evs[stat], 510 - currentTotal - added)
+          if (add > 0) {
+            evs[stat] += add
+            added += add
+          }
+        }
+        return { ...p, evs }
+      })
+      set({ roster: updatedRoster })
       const newRoundsWon = s.roundsWon + 1
       // Round 40 is the final round — victory!
       if (s.round >= 40) {
@@ -285,7 +304,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
               const p = roster[idx]
               const evs = { ...p.evs }
               const currentTotal = Object.values(evs).reduce((a, b) => a + b, 0)
-              const add = Math.min(100, 252 - evs[reward.stat], 510 - currentTotal)
+              const add = Math.min(80, 252 - evs[reward.stat], 510 - currentTotal)
               evs[reward.stat] = evs[reward.stat] + add
               roster[idx] = { ...p, evs }
             }

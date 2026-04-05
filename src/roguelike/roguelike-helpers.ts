@@ -431,7 +431,7 @@ export function generateRewardOptions(
     }
   }
 
-  // 4. EV boost — fixed Pokemon and stat, +40 EVs
+  // 4. EV boost — fixed Pokemon and stat, +80 EVs
   const stats: StatID[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe']
   const stat = stats[Math.floor(Math.random() * stats.length)]
   const evTarget = roster[Math.floor(Math.random() * roster.length)]
@@ -439,8 +439,8 @@ export function generateRewardOptions(
   if (evTarget?.species) {
     options.push({
       type: 'ev-boost',
-      label: `+100 ${statNames[stat]} EV`,
-      description: `Add 100 ${statNames[stat]} EVs to ${evTarget.species}.`,
+      label: `+80 ${statNames[stat]} EV`,
+      description: `Add 80 ${statNames[stat]} EVs to ${evTarget.species}.`,
       stat,
       targetSpecies: evTarget.species,
     })
