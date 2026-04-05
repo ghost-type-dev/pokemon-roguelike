@@ -1,0 +1,11 @@
+.git
+.claude
+.codex
+node_modules
+src
+README.md
+index.html
+package.json
+package-lock.json
+tsconfig.json
+vite.config.ts
