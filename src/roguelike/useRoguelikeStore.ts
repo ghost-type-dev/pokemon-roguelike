@@ -305,7 +305,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
             if (idx >= 0) {
               const abs = getAbilities(roster[idx].species).filter(a => a !== roster[idx].ability)
               if (abs.length > 0) {
-                roster[idx] = { ...roster[idx], ability: abs[0] }
+                roster[idx] = { ...roster[idx], ability: abs[Math.floor(Math.random() * abs.length)] }
               }
             }
           }

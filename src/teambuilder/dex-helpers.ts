@@ -33,6 +33,18 @@ export function getAbilities(speciesName: string, genNum = 9): string[] {
   return abilities
 }
 
+/** Get only non-hidden abilities (slots 0, 1, S — excludes H) */
+export function getRegularAbilities(speciesName: string, genNum = 9): string[] {
+  const species = getGen(genNum).species.get(speciesName)
+  if (!species) return []
+  const abilities: string[] = []
+  const raw = species.abilities as unknown as Record<string, string>
+  for (const key of Object.keys(raw)) {
+    if (key !== 'H' && raw[key]) abilities.push(raw[key])
+  }
+  return abilities
+}
+
 export async function getLearnableMoves(speciesName: string, genNum = 9): Promise<string[]> {
   const gen = getGen(genNum)
   const learnable = await gen.learnsets.learnable(speciesName)

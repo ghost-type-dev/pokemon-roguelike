@@ -1,4 +1,4 @@
-import { getGen, getSpecies, getAbilities, allNatures } from '../teambuilder/dex-helpers'
+import { getGen, getSpecies, getAbilities, getRegularAbilities, allNatures } from '../teambuilder/dex-helpers'
 import { createEmptySet, type PokemonSet } from '../teambuilder/useTeamBuilder'
 import { BATTLE_ITEMS, STARTERS, STAT_LABELS, type RewardOption } from './constants'
 import type { StatID } from '@pkmn/data'
@@ -107,12 +107,12 @@ export function pickRandomStarters(count: number): string[] {
 
 /** Create a PokemonSet for a starter */
 export function createStarterSet(speciesName: string): PokemonSet {
-  const abilities = getAbilities(speciesName)
+  const abilities = getRegularAbilities(speciesName)
   return {
     ...createEmptySet(),
     species: speciesName,
     name: speciesName,
-    ability: abilities[0] || '',
+    ability: abilities[Math.floor(Math.random() * abilities.length)] || '',
     level: 50,
     ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
     evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
@@ -246,14 +246,16 @@ function generateAIPokemonSet(
   baseStats: Record<string, number>,
   round: number,
 ): PokemonSet {
-  const abilities = getAbilities(speciesName)
-  const ability = abilities[Math.floor(Math.random() * abilities.length)] || ''
+  // Rounds 1-20: regular abilities only, no items
+  // Rounds 21+: may have hidden abilities and items
+  const abilityPool = round > 20 ? getAbilities(speciesName) : getRegularAbilities(speciesName)
+  const ability = abilityPool[Math.floor(Math.random() * abilityPool.length)] || ''
 
   const totalEVs = Math.min(510, round * 15)
   const evs = distributeEVs(totalEVs, baseStats)
   const natures = allNatures()
   const nature = natures[Math.floor(Math.random() * natures.length)].name
-  const item = BATTLE_ITEMS[Math.floor(Math.random() * BATTLE_ITEMS.length)]
+  const item = round > 20 ? BATTLE_ITEMS[Math.floor(Math.random() * BATTLE_ITEMS.length)] : ''
 
   return {
     species: speciesName,
