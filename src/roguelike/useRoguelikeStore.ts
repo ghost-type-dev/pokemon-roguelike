@@ -138,13 +138,16 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
     }
 
     if (newPicked.length >= 3) {
-      // Done picking — go to prepare
+      // Done picking — go to reward before first round
+      const rewards = generateRewardOptions(0, newRoster, [], inventory)
       set({
-        phase: 'prepare',
+        phase: 'reward',
         roster: newRoster,
         inventory,
         draftPicked: newPicked,
         draftChoices: [],
+        rewardOptions: rewards,
+        roundsWon: 0,
       })
     } else {
       set({

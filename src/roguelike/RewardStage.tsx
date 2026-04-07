@@ -58,16 +58,12 @@ export function RewardStage() {
       return
     }
 
-    // New move — pick random Pokemon, go to move selection
+    // New move — let player pick Pokemon first, then move selection
     if (reward.type === 'tm') {
-      const eligible = roster.filter(p => p.species)
-      const target = eligible[Math.floor(Math.random() * eligible.length)]
-      if (target) {
-        setSelectedReward(reward)
-        setTmMove(null)
-        setTmMoveChoices([])
-        await handlePickTMTarget(target.species)
-      }
+      setSelectedReward(reward)
+      setTmMove(null)
+      setTmMoveChoices([])
+      setTmTargetSpecies(null)
       return
     }
 
@@ -115,7 +111,9 @@ export function RewardStage() {
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-xl font-bold text-green-400">Victory! Round {roundsWon} cleared!</h2>
+        <h2 className="text-xl font-bold text-green-400">
+          {roundsWon === 0 ? 'Team Drafted!' : `Victory! Round ${roundsWon} cleared!`}
+        </h2>
         <p className="text-gray-400 text-sm mt-1">Choose a reward.</p>
         <button
           onClick={() => setShowTeam(t => !t)}
@@ -175,7 +173,37 @@ export function RewardStage() {
         </div>
       )}
 
-      {/* New move: pick from 4 random moves for a random Pokemon */}
+      {/* New move: pick Pokemon first, then pick move */}
+      {selectedReward?.type === 'tm' && !tmTargetSpecies && (
+        <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
+          <h3 className="text-white font-bold">Pick a Pokemon to learn a new move</h3>
+          <div className="space-y-1">
+            {roster.filter(p => p.species).map((p) => {
+              const sprite = Sprites.getPokemon(p.species, { gen: 'gen5' })
+              return (
+                <button
+                  key={p.species}
+                  onClick={() => handlePickTMTarget(p.species)}
+                  className="w-full flex items-center gap-2 p-2 rounded bg-gray-700 hover:bg-gray-600 transition-colors"
+                >
+                  {sprite && (
+                    <img
+                      src={sprite.url}
+                      width={32}
+                      height={32}
+                      alt={p.species}
+                      className="object-contain"
+                      style={{ imageRendering: sprite.pixelated ? 'pixelated' : 'auto' }}
+                    />
+                  )}
+                  <span className="text-white text-sm font-medium">{p.species}</span>
+                  <span className="text-gray-500 text-xs ml-auto">{p.moves.filter(Boolean).join(', ')}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
       {selectedReward?.type === 'tm' && tmTargetSpecies && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
           <h3 className="text-white font-bold">New Move for {tmTargetSpecies}</h3>
