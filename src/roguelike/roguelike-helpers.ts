@@ -354,6 +354,18 @@ function pickAIMoves(
     }
   }
 
+  // Guarantee at least one attacking move
+  const hasAttack = selected.some(name => {
+    const m = pool.find(p => p.name === name)
+    return m && m.category !== 'Status' && m.basePower > 0
+  })
+  if (!hasAttack) {
+    const attackMoves = pool.filter(m => m.category !== 'Status' && m.basePower > 0 && !selected.includes(m.name))
+    if (attackMoves.length > 0) {
+      selected.push(attackMoves[Math.floor(Math.random() * attackMoves.length)].name)
+    }
+  }
+
   // Random slots: fill remaining with random moves from pool
   const remaining = pool.filter(m => !selected.includes(m.name))
   const shuffled = [...remaining].sort(() => Math.random() - 0.5)
