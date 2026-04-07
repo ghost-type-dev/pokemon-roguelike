@@ -32,6 +32,7 @@ export function RewardStage() {
   const roster = useRoguelikeStore((s) => s.roster)
   const applyReward = useRoguelikeStore((s) => s.applyReward)
   const roundsWon = useRoguelikeStore((s) => s.roundsWon)
+  const round = useRoguelikeStore((s) => s.round)
 
   const [selectedReward, setSelectedReward] = useState<RewardOption | null>(null)
   const [tmMove, setTmMove] = useState<string | null>(null)
@@ -87,7 +88,14 @@ export function RewardStage() {
     const knownMoves = pokemon ? pokemon.moves.filter(Boolean) : []
     const allMoves = await getAllLearnableMoves(species)
     const alreadyKnown = new Set([...knownMoves, ...alreadyUnlocked])
-    const unlearned = allMoves.filter(m => !alreadyKnown.has(m))
+    // Cap move power: next round's opponent cap + 15
+    const maxPower = 50 + 3 * (round + 1) + 15
+    const unlearned = allMoves.filter(m => {
+      if (alreadyKnown.has(m)) return false
+      const md = getMove(m)
+      if (md && md.category !== 'Status' && md.basePower > maxPower) return false
+      return true
+    })
     // Pick up to 4 random moves
     const shuffled = [...unlearned].sort(() => Math.random() - 0.5)
     const choices = shuffled.slice(0, 4)
