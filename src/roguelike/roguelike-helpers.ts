@@ -89,8 +89,11 @@ export async function getAllLearnableMoves(speciesName: string, genNum = 9): Pro
   const learnable = await gen.learnsets.learnable(speciesName)
   if (!learnable) return []
 
+  const prefix = String(genNum)
   const moves: string[] = []
-  for (const moveId of Object.keys(learnable)) {
+  for (const [moveId, sources] of Object.entries(learnable)) {
+    // Only include moves that have a source in the current gen
+    if (!(sources as string[]).some(s => s.startsWith(prefix))) continue
     const move = gen.moves.get(moveId)
     if (move) moves.push(move.name)
   }
@@ -300,9 +303,10 @@ export async function fillAIMoves(team: PokemonSet[], round = 0): Promise<Pokemo
       continue
     }
 
-    // Get all moves with their data
+    // Get all moves with their data (only Gen 9 learnable)
     const movePool: Array<{ name: string; type: string; basePower: number; category: string }> = []
-    for (const moveId of Object.keys(learnable)) {
+    for (const [moveId, sources] of Object.entries(learnable)) {
+      if (!(sources as string[]).some(s => s.startsWith('9'))) continue
       const move = gen.moves.get(moveId)
       if (!move) continue
       // Filter out moves exceeding the power cap (status moves always allowed)
