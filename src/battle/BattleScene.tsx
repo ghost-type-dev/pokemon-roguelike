@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useBattleStore } from './useBattleStore'
 import { PokemonSprite } from './PokemonSprite'
 import { HPBar } from './HPBar'
@@ -208,10 +208,6 @@ function TeamIndicator({ team }: { team: TeamOverview }) {
 
 function TurnNarration({ events }: { events: Array<{ data: string }> }) {
   const lines = useMemo(() => {
-    // Find the last two |turn| markers to get the most recent completed turn's events
-    // Events go: ...actions... |turn|N ...actions... |turn|N+1
-    // When waiting for input, the interesting events are between the two most recent |turn| markers
-    // If events exist after the last |turn|, show those instead (mid-turn playback)
     const turnIndices: number[] = []
     for (let i = 0; i < events.length; i++) {
       const type = events[i].data.split('|')[1]
@@ -221,7 +217,6 @@ function TurnNarration({ events }: { events: Array<{ data: string }> }) {
     let turnEvents: Array<{ data: string }>
     const lastTurnIdx = turnIndices[turnIndices.length - 1] ?? -1
 
-    // Check if there are meaningful events after the last |turn|
     const eventsAfterTurn = lastTurnIdx >= 0 ? events.slice(lastTurnIdx + 1) : []
     const hasEventsAfterTurn = eventsAfterTurn.some((e) => {
       const t = e.data.split('|')[1]
@@ -229,14 +224,11 @@ function TurnNarration({ events }: { events: Array<{ data: string }> }) {
     })
 
     if (hasEventsAfterTurn) {
-      // Mid-turn: show events after the last |turn|
       turnEvents = eventsAfterTurn
     } else if (turnIndices.length >= 2) {
-      // Waiting for input: show events from the previous completed turn
       const prevTurnIdx = turnIndices[turnIndices.length - 2]
       turnEvents = events.slice(prevTurnIdx + 1, lastTurnIdx)
     } else if (lastTurnIdx >= 0) {
-      // Only one turn marker: show events before it
       turnEvents = events.slice(0, lastTurnIdx)
     } else {
       turnEvents = events
@@ -245,14 +237,40 @@ function TurnNarration({ events }: { events: Array<{ data: string }> }) {
     return turnEvents
       .map((e) => formatLine(e.data))
       .filter((l): l is NonNullable<typeof l> => l !== null)
-      .filter((l) => !l.className.includes('text-xs')) // skip dim meta lines
+      .filter((l) => !l.className.includes('text-xs'))
   }, [events])
+
+  const [visibleCount, setVisibleCount] = useState(0)
+  const prevLinesRef = useRef(lines)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // When lines change, reset and start revealing one by one
+  useEffect(() => {
+    if (lines !== prevLinesRef.current) {
+      prevLinesRef.current = lines
+      setVisibleCount(0)
+    }
+  }, [lines])
+
+  useEffect(() => {
+    if (visibleCount < lines.length) {
+      const timer = setTimeout(() => setVisibleCount(c => c + 1), 400)
+      return () => clearTimeout(timer)
+    }
+  }, [visibleCount, lines.length])
+
+  // Auto-scroll to bottom as new lines appear
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
+    }
+  }, [visibleCount])
 
   if (!lines.length) return null
 
   return (
-    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/60 rounded px-3 py-1.5 max-w-96 max-h-40 overflow-y-auto pointer-events-auto">
-      {lines.map((line, i) => (
+    <div ref={containerRef} className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/60 rounded px-3 py-1.5 max-w-96 max-h-40 overflow-y-auto pointer-events-auto">
+      {lines.slice(0, visibleCount).map((line, i) => (
         <div key={i} className={`${line.className} text-xs leading-tight`}>
           {line.text}
         </div>
