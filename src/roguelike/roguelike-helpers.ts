@@ -439,11 +439,11 @@ export function generateRewardOptions(
     })
   }
 
-  // 2. New move reward — player picks Pokemon, gets 4 random unlearned moves to choose from
+  // 2. New move reward — player picks Pokemon, then picks from 4 random unlearned moves
   options.push({
     type: 'tm',
     label: 'Learn New Move',
-    description: 'Teach a new move to a random Pokemon.',
+    description: 'Pick a Pokemon and teach it a new move.',
   })
 
   // 3. Ability change
