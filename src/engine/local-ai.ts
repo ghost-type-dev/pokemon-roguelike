@@ -373,6 +373,21 @@ export class HeuristicAI implements LocalAI {
       })
       const calcMove = new Move(gen, move.id)
       if (calcMove.category === 'Status') return this.scoreStatusMove(move.id, myPoke, oppData)
+      const moveData = gen.moves.get(move.id)
+      // Focus Punch fails if hit before executing — almost never works
+      if (move.id === 'focuspunch') return 5
+      // Dream Eater / Nightmare: only work on sleeping targets
+      if ((move.id === 'dreameater' || move.id === 'nightmare') && oppData.status !== 'slp') return 0
+      // Snore / Sleep Talk: only work when the user is asleep
+      if ((move.id === 'snore' || move.id === 'sleeptalk') && !myPoke.condition.includes('slp')) return 0
+      // Last Resort: only works after all other moves used — unreliable
+      if (move.id === 'lastresort') return 5
+      // Belch: only works after consuming a berry — unreliable
+      if (move.id === 'belch') return 5
+      // Poltergeist: fails if target has no item
+      if (move.id === 'poltergeist' && oppData.knownItem === '(consumed)') return 0
+      // Moves that need a charge turn (Solar Beam, Meteor Beam, etc.) are risky without the right item/weather
+      if ((moveData?.flags as any)?.charge) return (moveData?.basePower || 0) * 0.3
       const result = calculate(gen, attacker, defender, calcMove)
       const dmgRange = result.range()
       const avgDmg = (dmgRange[0] + dmgRange[1]) / 2
@@ -382,8 +397,12 @@ export class HeuristicAI implements LocalAI {
       const minDmgPercent = defenderHP > 0 ? (dmgRange[0] / defenderHP) * 100 : 0
       if (minDmgPercent >= oppData.hpPercent) score += 50
       else if (dmgPercent >= oppData.hpPercent) score += 25
-      const moveData = gen.moves.get(move.id)
       if (moveData && (moveData.priority ?? 0) > 0 && oppData.hpPercent < 30) score += 20
+      // Penalize low-accuracy moves proportionally
+      const acc = (moveData as any)?.accuracy
+      if (typeof acc === 'number' && acc < 100) {
+        score *= acc / 100
+      }
       return score
     } catch {
       const moveData = gen.moves.get(move.id)

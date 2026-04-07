@@ -78,7 +78,9 @@ export function TeamPanel() {
       <div className="space-y-1">
         {pokemon.map((poke: any, i: number) => {
           const name = poke.ident.split(': ')[1]
-          const species = poke.details.split(',')[0]
+          const details = poke.details || ''
+          const species = details.split(',')[0]
+          const gender = details.includes(', M') ? 'M' : details.includes(', F') ? 'F' : ''
           const fainted = poke.condition === '0 fnt' || poke.condition.endsWith(' fnt')
           const hp = parseHP(poke.condition)
           const hpText = fainted ? 'Fainted' : poke.condition.split(' ')[0]
@@ -110,6 +112,8 @@ export function TeamPanel() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="text-white text-sm font-medium truncate">{name}</span>
+                        {gender === 'M' && <span className="text-blue-400 text-sm">♂</span>}
+                        {gender === 'F' && <span className="text-pink-400 text-sm">♀</span>}
                         {lookupTypes(species).map((t: string) => (
                           <span
                             key={t}

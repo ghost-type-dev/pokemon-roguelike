@@ -118,7 +118,11 @@ export function PrepareStage() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-white text-sm font-medium truncate">{p.species}</div>
+                      <div className="text-white text-sm font-medium truncate">
+                        {p.species}
+                        {p.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
+                        {p.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
+                      </div>
                       <div className="text-gray-400 text-xs truncate">
                         {p.moves.filter(Boolean).join(', ') || 'No moves'}
                       </div>
@@ -186,7 +190,7 @@ function PokemonPrepareEditor({
   onItemChange,
   onEvolve,
 }: {
-  pokemon: { species: string; ability: string; item: string; moves: string[]; evs: Record<StatID, number>; ivs: Record<StatID, number>; nature: string; level: number }
+  pokemon: { species: string; ability: string; item: string; moves: string[]; evs: Record<StatID, number>; ivs: Record<StatID, number>; nature: string; level: number; gender: string }
   slotIndex: number
   allowedMoves: string[]
   ownedItems: string[]
@@ -242,7 +246,11 @@ function PokemonPrepareEditor({
           )}
         </div>
         <div className="flex-1">
-          <div className="text-white font-bold text-lg">{species.name}</div>
+          <div className="text-white font-bold text-lg">
+            {species.name}
+            {pokemon.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
+            {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
+          </div>
           <div className="flex items-center gap-2 mt-1">
             {species.types.map((t: string) => (
               <span
@@ -367,7 +375,8 @@ function PokemonPrepareEditor({
                   <div className="mt-0.5 px-2 text-xs text-gray-500">
                     {md.shortDesc}
                     <span className="ml-2 text-gray-600">
-                      {md.accuracy === true ? '' : `${md.accuracy}% acc`}
+                      {md.category === 'Physical' ? '⚔ Physical' : md.category === 'Special' ? '✦ Special' : '◎ Status'}
+                      {md.accuracy === true ? '' : ` · ${md.accuracy}% acc`}
                       {md.pp ? ` · ${md.pp} PP` : ''}
                       {md.priority !== 0 ? ` · Priority ${md.priority > 0 ? '+' : ''}${md.priority}` : ''}
                     </span>

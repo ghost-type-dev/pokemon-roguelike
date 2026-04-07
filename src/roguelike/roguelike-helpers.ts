@@ -3,6 +3,22 @@ import { createEmptySet, type PokemonSet } from '../teambuilder/useTeamBuilder'
 import { BATTLE_ITEMS, STARTERS, STAT_LABELS, type RewardOption } from './constants'
 import type { StatID } from '@pkmn/data'
 
+// ─── Gender ─────────────────────────────────────────────────────────────────
+
+/** Pick a random gender based on species gender ratio */
+export function randomGender(speciesName: string): '' | 'M' | 'F' {
+  const species = getSpecies(speciesName)
+  if (!species) return ''
+  // Fixed gender species (e.g. Chansey=F, Tauros=M) or genderless (Magnemite)
+  if (species.gender === 'M') return 'M'
+  if (species.gender === 'F') return 'F'
+  if (species.gender === 'N') return ''
+  // Random based on ratio
+  const ratio = species.genderRatio as { M: number; F: number }
+  if (!ratio || (ratio.M === 0 && ratio.F === 0)) return ''
+  return Math.random() < ratio.M ? 'M' : 'F'
+}
+
 // ─── Move filtering ─────────────────────────────────────────────────────────
 
 // Natural source types: L=level-up, E=egg, T=tutor
@@ -102,6 +118,7 @@ export function createStarterSet(speciesName: string): PokemonSet {
     ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
     evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
     nature: species ? pickNatureForStats(species.baseStats as Record<StatID, number>) : 'Adamant',
+    gender: randomGender(speciesName),
   }
 }
 
@@ -235,7 +252,8 @@ function generateAIPokemonSet(
 
   const totalEVs = Math.min(510, round * 15)
   const evs = distributeEVs(totalEVs, baseStats)
-  const nature = pickNatureForStats(baseStats as Record<StatID, number>)
+  const natures = allNatures()
+  const nature = natures[Math.floor(Math.random() * natures.length)].name
   const item = BATTLE_ITEMS[Math.floor(Math.random() * BATTLE_ITEMS.length)]
 
   return {
@@ -248,7 +266,7 @@ function generateAIPokemonSet(
     evs,
     ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
     level: 50,
-    gender: '',
+    gender: randomGender(speciesName),
   }
 }
 
@@ -264,6 +282,8 @@ function getSmartMoveSlots(round: number): number {
 export async function fillAIMoves(team: PokemonSet[], round = 0): Promise<PokemonSet[]> {
   const gen = getGen(9)
   const smartSlots = getSmartMoveSlots(round)
+  // Draft picks (round 0): cap at 50 BP. Opponent AI: cap at 50 + 3*round.
+  const maxMovePower = round === 0 ? 50 : 50 + 3 * round
   const result: PokemonSet[] = []
 
   for (const poke of team) {
@@ -284,6 +304,8 @@ export async function fillAIMoves(team: PokemonSet[], round = 0): Promise<Pokemo
     for (const moveId of Object.keys(learnable)) {
       const move = gen.moves.get(moveId)
       if (!move) continue
+      // Filter out moves exceeding the power cap (status moves always allowed)
+      if (move.category !== 'Status' && move.basePower > maxMovePower) continue
       movePool.push({
         name: move.name,
         type: move.type,

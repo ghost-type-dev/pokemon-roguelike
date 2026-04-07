@@ -125,17 +125,31 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
     const newPoke = draftPoke ? { ...draftPoke } : createStarterSet(species)
     const newRoster = [...s.roster, newPoke]
 
+    // Seed initial moves into unlockedTMs so they can be re-learned if swapped out
+    const inventory = {
+      items: [...s.inventory.items],
+      unlockedTMs: { ...s.inventory.unlockedTMs },
+    }
+    const initialMoves = newPoke.moves.filter(Boolean)
+    if (initialMoves.length > 0) {
+      const existing = inventory.unlockedTMs[species] || []
+      const combined = new Set([...existing, ...initialMoves])
+      inventory.unlockedTMs[species] = [...combined]
+    }
+
     if (newPicked.length >= 3) {
       // Done picking — go to prepare
       set({
         phase: 'prepare',
         roster: newRoster,
+        inventory,
         draftPicked: newPicked,
         draftChoices: [],
       })
     } else {
       set({
         roster: newRoster,
+        inventory,
         draftPicked: newPicked,
       })
     }
@@ -327,6 +341,13 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
             const newPoke = recruited
               ? { ...recruited, item: '', evs: { ...recruited.evs }, ivs: { ...recruited.ivs }, moves: [...recruited.moves] as [string, string, string, string] }
               : createStarterSet(reward.pokemonSpecies)
+            // Seed initial moves into unlockedTMs so they can be re-learned if swapped out
+            const recruitMoves = newPoke.moves.filter(Boolean)
+            if (recruitMoves.length > 0) {
+              const existing = inventory.unlockedTMs[reward.pokemonSpecies] || []
+              const combined = new Set([...existing, ...recruitMoves])
+              inventory.unlockedTMs[reward.pokemonSpecies] = [...combined]
+            }
             if (roster.length < 6) {
               roster.push(newPoke)
             } else if (reward.replaceIndex != null && reward.replaceIndex >= 0 && reward.replaceIndex < roster.length) {

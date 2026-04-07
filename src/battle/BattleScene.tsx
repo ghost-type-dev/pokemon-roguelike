@@ -12,6 +12,7 @@ interface PokemonState {
   level: number
   status: string
   fainted: boolean
+  gender: string
 }
 
 type TeamMemberStatus = 'alive' | 'fainted' | 'unknown'
@@ -68,6 +69,7 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
       const species = details.split(',')[0].trim()
       const name = ident.split(': ')[1] || species
       const level = parseInt(details.match(/L(\d+)/)?.[1] || '100')
+      const gender = details.includes(', M') ? 'M' : details.includes(', F') ? 'F' : ''
       const { hp, maxHp, status } = parseCondition(condition)
 
       const state: PokemonState = {
@@ -78,6 +80,7 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
         level,
         status,
         fainted: false,
+        gender,
       }
 
       if (side === 'p1') { p1 = state; p1Team.activeName = species }
@@ -291,6 +294,7 @@ export function BattleScene() {
             max={p2.maxHp}
             level={p2.level}
             status={p2.status}
+            gender={p2.gender}
           />
         )}
       </div>
@@ -313,6 +317,7 @@ export function BattleScene() {
             max={p1.maxHp}
             level={p1.level}
             status={p1.status}
+            gender={p1.gender}
           />
         )}
       </div>

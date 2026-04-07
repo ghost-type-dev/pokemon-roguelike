@@ -4,6 +4,7 @@ interface HPBarProps {
   name: string
   level?: number
   status?: string
+  gender?: string
 }
 
 function getHPColor(percent: number): string {
@@ -25,7 +26,7 @@ function getStatusBadge(status: string | undefined): { text: string; color: stri
   return badges[status] || null
 }
 
-export function HPBar({ current, max, name, level, status }: HPBarProps) {
+export function HPBar({ current, max, name, level, status, gender }: HPBarProps) {
   const percent = max > 0 ? Math.max(0, (current / max) * 100) : 0
   const statusBadge = getStatusBadge(status)
 
@@ -34,6 +35,8 @@ export function HPBar({ current, max, name, level, status }: HPBarProps) {
       <div className="flex items-center justify-between mb-0.5">
         <span className="text-white font-bold text-sm truncate">
           {name}
+          {gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
+          {gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
           {level && <span className="text-gray-400 font-normal ml-1">Lv{level}</span>}
         </span>
         {statusBadge && (
