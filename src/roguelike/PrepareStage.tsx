@@ -68,14 +68,7 @@ export function PrepareStage() {
     }))
   }
 
-  const commitEvEdits = () => {
-    for (const [idx, evs] of Object.entries(evEdits)) {
-      updateRosterPokemon(Number(idx), { evs })
-    }
-  }
-
   const handleStartBattle = () => {
-    commitEvEdits()
     finishPrepare()
   }
 
@@ -197,7 +190,15 @@ export function PrepareStage() {
               ownedItems={availableItems}
               round={round}
               editedEvs={getEditedEvs(activeSlot)}
+              evDirty={!!evEdits[activeSlot]}
               onEvChange={(stat, delta) => handleEvChange(activeSlot, stat, delta)}
+              onEvSave={() => {
+                const evs = evEdits[activeSlot]
+                if (evs) {
+                  updateRosterPokemon(activeSlot, { evs })
+                  setEvEdits(prev => { const next = { ...prev }; delete next[activeSlot]; return next })
+                }
+              }}
               onMoveChange={updateRosterMove}
               onItemChange={(idx, item) => updateRosterPokemon(idx, { item })}
               onEvolve={evolvePokemon}
@@ -220,7 +221,9 @@ function PokemonPrepareEditor({
   ownedItems,
   round,
   editedEvs,
+  evDirty,
   onEvChange,
+  onEvSave,
   onMoveChange,
   onItemChange,
   onEvolve,
@@ -231,7 +234,9 @@ function PokemonPrepareEditor({
   ownedItems: string[]
   round: number
   editedEvs: Record<StatID, number>
+  evDirty: boolean
   onEvChange: (stat: StatID, delta: number) => void
+  onEvSave: () => void
   onMoveChange: (slotIdx: number, moveIdx: number, move: string) => void
   onItemChange: (slotIdx: number, item: string) => void
   onEvolve: (slotIdx: number, evoSpecies: string) => void
@@ -432,9 +437,19 @@ function PokemonPrepareEditor({
           return (
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs text-gray-400">Stats</label>
-              <span className={`text-xs font-medium ${evTotal >= 510 ? 'text-red-400' : 'text-gray-400'}`}>
-                EVs: {evTotal} / 510
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-medium ${evTotal >= 510 ? 'text-red-400' : 'text-gray-400'}`}>
+                  EVs: {evTotal} / 510
+                </span>
+                {evDirty && (
+                  <button
+                    onClick={onEvSave}
+                    className="text-xs px-2 py-0.5 rounded bg-green-600 hover:bg-green-500 text-white font-medium transition-colors"
+                  >
+                    Save EVs
+                  </button>
+                )}
+              </div>
             </div>
           )
         })()}
