@@ -269,19 +269,19 @@ export class HeuristicAI implements LocalAI {
       }
       case '-sidestart': {
         const side = parts[2] || ''
-        const effect = parts[3] || ''
+        const effect = (parts[3] || '').replace('move: ', '')
         const sideId = side.startsWith('p1') ? 'p1' : 'p2'
-        if (effect.includes('Stealth Rock') || effect.includes('Spikes') || effect.includes('Toxic Spikes') || effect.includes('Sticky Web')) {
+        if (['Stealth Rock', 'Spikes', 'Toxic Spikes', 'Sticky Web'].some(h => effect.includes(h))) {
           (sideId === 'p1' ? this.field.p1Hazards : this.field.p2Hazards).add(effect)
         }
-        if (effect.includes('Reflect') || effect.includes('Light Screen') || effect.includes('Aurora Veil')) {
+        if (['Reflect', 'Light Screen', 'Aurora Veil', 'Tailwind', 'Safeguard', 'Mist'].some(s => effect.includes(s))) {
           (sideId === 'p1' ? this.field.p1Screens : this.field.p2Screens).add(effect)
         }
         break
       }
       case '-sideend': {
         const side = parts[2] || ''
-        const effect = parts[3] || ''
+        const effect = (parts[3] || '').replace('move: ', '')
         const sideId = side.startsWith('p1') ? 'p1' : 'p2'
         ;(sideId === 'p1' ? this.field.p1Hazards : this.field.p2Hazards).delete(effect)
         ;(sideId === 'p1' ? this.field.p1Screens : this.field.p2Screens).delete(effect)
@@ -413,21 +413,27 @@ export class HeuristicAI implements LocalAI {
   private scoreStatusMove(moveId: string, myPoke: any, oppData: OpponentPokemon): number {
     const moveName = moveId.toLowerCase()
     const myHazards = this.playerId === 'p1' ? this.field.p2Hazards : this.field.p1Hazards
-    if (moveName === 'stealthrock' && !myHazards.has('Stealth Rock')) return 60
+    if (moveName === 'stealthrock') return myHazards.has('Stealth Rock') ? 0 : 60
     if (moveName === 'spikes') return 40
     if (moveName === 'toxicspikes') return 35
-    if (moveName === 'stickyweb' && !myHazards.has('Sticky Web')) return 45
-    if (!oppData.status) {
+    if (moveName === 'stickyweb') return myHazards.has('Sticky Web') ? 0 : 45
+    const STATUS_MOVES = ['thunderwave', 'glare', 'stunspore', 'toxic', 'willowisp', 'spore', 'sleeppowder', 'darkvoid', 'yawn', 'poisonpowder', 'toxicthread', 'nuzzle', 'hypnosis', 'sing', 'grasswhistle', 'lovelykiss']
+    if (STATUS_MOVES.includes(moveName)) {
+      if (oppData.status) return 0
       if (['thunderwave', 'glare', 'stunspore'].includes(moveName)) return 35
       if (moveName === 'toxic') return 40
       if (moveName === 'willowisp') return 38
-      if (['spore', 'sleeppowder', 'darkvoid'].includes(moveName)) return 55
+      if (['spore', 'sleeppowder', 'darkvoid', 'hypnosis', 'sing', 'grasswhistle', 'lovelykiss'].includes(moveName)) return 55
       if (moveName === 'yawn') return 30
+      return 25
     }
     const myScreens = this.playerId === 'p1' ? this.field.p1Screens : this.field.p2Screens
-    if (moveName === 'reflect' && !myScreens.has('Reflect')) return 35
-    if (moveName === 'lightscreen' && !myScreens.has('Light Screen')) return 35
-    if (moveName === 'auroraveil' && !myScreens.has('Aurora Veil') && this.field.weather === 'Hail') return 50
+    if (moveName === 'reflect') return myScreens.has('Reflect') ? 0 : 35
+    if (moveName === 'lightscreen') return myScreens.has('Light Screen') ? 0 : 35
+    if (moveName === 'auroraveil') return myScreens.has('Aurora Veil') ? 0 : (this.field.weather === 'Hail' ? 50 : 0)
+    if (moveName === 'tailwind') return myScreens.has('Tailwind') ? 0 : 40
+    if (moveName === 'safeguard') return myScreens.has('Safeguard') ? 0 : 25
+    if (moveName === 'mist') return myScreens.has('Mist') ? 0 : 20
     if (['swordsdance', 'nastyplot', 'dragondance', 'quiverdance', 'shellsmash', 'calmmind', 'bulkup'].includes(moveName)) {
       const myHP = parseHP(myPoke.condition)
       if (myHP > 70) return 35
