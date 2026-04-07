@@ -364,7 +364,8 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
         roster,
         inventory,
         phase: 'prepare' as RoguelikePhase,
-        round: s.round + 1,
+        // Don't increment round for the initial draft reward (roundsWon === 0)
+        round: s.roundsWon === 0 ? s.round : s.round + 1,
         rewardOptions: [],
       }
     })

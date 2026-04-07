@@ -36,9 +36,11 @@ export function MovePanel() {
     return <SwitchPanel request={humanRequest} forced />
   }
 
-  // Team preview
+  // Team preview — auto-submit default order (team is already ordered in prepare screen)
   if (humanRequest.teamPreview) {
-    return <TeamPreviewPanel request={humanRequest} />
+    const order = humanRequest.side.pokemon.map((_: any, i: number) => i + 1).join('')
+    battleManager.submitHumanChoice(`team ${order}`)
+    return null
   }
 
   // Normal move selection
@@ -172,37 +174,6 @@ function SwitchPanel({ request, forced }: { request: any; forced?: boolean }) {
   )
 }
 
-function TeamPreviewPanel({ request }: { request: any }) {
-  const pokemon = request.side.pokemon
-
-  const handleTeamOrder = () => {
-    // Just use default order for now
-    const order = pokemon.map((_: any, i: number) => i + 1).join('')
-    battleManager.submitHumanChoice(`team ${order}`)
-  }
-
-  return (
-    <div className="bg-gray-800 rounded-lg p-4 space-y-3">
-      <div className="text-sm text-gray-400">Team Preview - Your team:</div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {pokemon.map((poke: any, i: number) => (
-          <div key={i} className="bg-gray-700 rounded-lg p-2">
-            <div className="font-medium text-sm text-white">{poke.ident.split(': ')[1]}</div>
-            <div className="text-xs text-gray-400">{poke.details.split(', ')[0]}</div>
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={handleTeamOrder}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition-colors w-full"
-      >
-        Start Battle!
-      </button>
-    </div>
-  )
-}
 
 function parseHP(condition: string): number {
   if (condition === '0 fnt' || condition.endsWith(' fnt')) return 0
