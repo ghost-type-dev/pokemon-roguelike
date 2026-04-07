@@ -389,6 +389,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
         lastOpponentTeam: s.lastOpponentTeam,
         roundsWon: s.roundsWon,
         pendingOpponentTeam: s.pendingOpponentTeam,
+        preRewardSnapshot: s.preRewardSnapshot,
       }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
     } catch (e) {
@@ -425,6 +426,7 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
       lastOpponentTeam: s.lastOpponentTeam,
       roundsWon: s.roundsWon,
       pendingOpponentTeam: s.pendingOpponentTeam,
+      preRewardSnapshot: s.preRewardSnapshot,
     }
     const json = JSON.stringify(data, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
