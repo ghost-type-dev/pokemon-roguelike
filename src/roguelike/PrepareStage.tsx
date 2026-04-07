@@ -48,6 +48,37 @@ export function PrepareStage() {
     return [...combined].sort()
   }, [activePokemon?.species, activePokemon?.moves, inventory.unlockedTMs])
 
+  // Local EV edits — only committed when starting battle
+  const [evEdits, setEvEdits] = useState<Record<number, Record<StatID, number>>>({})
+
+  const getEditedEvs = (slotIdx: number): Record<StatID, number> => {
+    return evEdits[slotIdx] ?? roster[slotIdx]?.evs ?? { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
+  }
+
+  const handleEvChange = (slotIdx: number, stat: StatID, delta: number) => {
+    const current = getEditedEvs(slotIdx)
+    const earned = roster[slotIdx]?.evs[stat] ?? 0
+    const currentTotal = Object.values(current).reduce((a, b) => a + b, 0)
+    const newVal = Math.max(0, Math.min(earned, Math.min(252, current[stat] + delta)))
+    const newTotal = currentTotal - current[stat] + newVal
+    if (newTotal > 510) return
+    setEvEdits(prev => ({
+      ...prev,
+      [slotIdx]: { ...current, [stat]: newVal },
+    }))
+  }
+
+  const commitEvEdits = () => {
+    for (const [idx, evs] of Object.entries(evEdits)) {
+      updateRosterPokemon(Number(idx), { evs })
+    }
+  }
+
+  const handleStartBattle = () => {
+    commitEvEdits()
+    finishPrepare()
+  }
+
   const canStart = roster.some(p => p.species && p.moves.some(m => m !== ''))
 
   return (
@@ -55,7 +86,7 @@ export function PrepareStage() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-white">Prepare for Round {round}</h2>
         <button
-          onClick={finishPrepare}
+          onClick={handleStartBattle}
           disabled={!canStart}
           className={`px-6 py-2 rounded-lg font-bold transition-colors ${
             canStart
@@ -165,6 +196,8 @@ export function PrepareStage() {
               allowedMoves={allowedMoves}
               ownedItems={availableItems}
               round={round}
+              editedEvs={getEditedEvs(activeSlot)}
+              onEvChange={(stat, delta) => handleEvChange(activeSlot, stat, delta)}
               onMoveChange={updateRosterMove}
               onItemChange={(idx, item) => updateRosterPokemon(idx, { item })}
               onEvolve={evolvePokemon}
@@ -186,6 +219,8 @@ function PokemonPrepareEditor({
   allowedMoves,
   ownedItems,
   round,
+  editedEvs,
+  onEvChange,
   onMoveChange,
   onItemChange,
   onEvolve,
@@ -195,6 +230,8 @@ function PokemonPrepareEditor({
   allowedMoves: string[]
   ownedItems: string[]
   round: number
+  editedEvs: Record<StatID, number>
+  onEvChange: (stat: StatID, delta: number) => void
   onMoveChange: (slotIdx: number, moveIdx: number, move: string) => void
   onItemChange: (slotIdx: number, item: string) => void
   onEvolve: (slotIdx: number, evoSpecies: string) => void
@@ -390,23 +427,38 @@ function PokemonPrepareEditor({
 
       {/* Stats table: Base / IV / EV / Total */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Stats</label>
+        {(() => {
+          const evTotal = Object.values(editedEvs).reduce((a, b) => a + b, 0)
+          return (
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs text-gray-400">Stats</label>
+              <span className={`text-xs font-medium ${evTotal >= 510 ? 'text-red-400' : 'text-gray-400'}`}>
+                EVs: {evTotal} / 510
+              </span>
+            </div>
+          )
+        })()}
         <div className="bg-gray-700 rounded overflow-hidden">
           {/* Header row */}
-          <div className="grid grid-cols-[3rem_1fr_2.5rem_2rem_2.5rem_3rem] gap-1 px-2 py-1 text-[10px] text-gray-500 border-b border-gray-600">
+          <div className="grid grid-cols-[3rem_1fr_2.5rem_2rem_5.5rem_3rem] gap-1 px-2 py-1 text-[10px] text-gray-500 border-b border-gray-600">
             <span>Stat</span>
             <span></span>
             <span className="text-right">Base</span>
             <span className="text-right">IV</span>
-            <span className="text-right">EV</span>
+            <span className="text-center">EV</span>
             <span className="text-right">Total</span>
           </div>
           {STATS.map((stat) => {
-            const total = calcStat(stat, bs[stat], pokemon.ivs[stat], pokemon.evs[stat], pokemon.level, natureData || undefined)
+            const ev = editedEvs[stat]
+            const evTotal = Object.values(editedEvs).reduce((a, b) => a + b, 0)
+            const total = calcStat(stat, bs[stat], pokemon.ivs[stat], ev, pokemon.level, natureData || undefined)
             const isPlus = natureData?.plus === stat
             const isMinus = natureData?.minus === stat
+            const maxForStat = pokemon.evs[stat] // can't exceed what was earned
+            const canIncrease = ev < maxForStat && ev < 252 && evTotal < 510
+            const canDecrease = ev > 0
             return (
-              <div key={stat} className="grid grid-cols-[3rem_1fr_2.5rem_2rem_2.5rem_3rem] gap-1 items-center px-2 py-0.5 text-xs">
+              <div key={stat} className="grid grid-cols-[3rem_1fr_2.5rem_2rem_5.5rem_3rem] gap-1 items-center px-2 py-0.5 text-xs">
                 <span className={`font-medium ${isPlus ? 'text-green-400' : isMinus ? 'text-red-400' : 'text-gray-400'}`}>
                   {STAT_LABELS[stat]}
                   {isPlus && '+'}
@@ -420,9 +472,25 @@ function PokemonPrepareEditor({
                 </div>
                 <span className="text-gray-300 text-right">{bs[stat]}</span>
                 <span className="text-blue-400 text-right">{pokemon.ivs[stat]}</span>
-                <span className={`text-right ${pokemon.evs[stat] > 0 ? 'text-green-400' : 'text-gray-600'}`}>
-                  {pokemon.evs[stat]}
-                </span>
+                <div className="flex items-center justify-center gap-0.5">
+                  <button
+                    onClick={() => onEvChange(stat, -4)}
+                    disabled={!canDecrease}
+                    className="w-4 h-4 flex items-center justify-center rounded bg-gray-600 hover:bg-red-700 text-gray-300 disabled:opacity-30 disabled:hover:bg-gray-600 text-[10px] leading-none"
+                  >
+                    −
+                  </button>
+                  <span className={`w-8 text-center ${ev > 0 ? 'text-green-400' : 'text-gray-600'}`}>
+                    {ev}
+                  </span>
+                  <button
+                    onClick={() => onEvChange(stat, 4)}
+                    disabled={!canIncrease}
+                    className="w-4 h-4 flex items-center justify-center rounded bg-gray-600 hover:bg-green-700 text-gray-300 disabled:opacity-30 disabled:hover:bg-gray-600 text-[10px] leading-none"
+                  >
+                    +
+                  </button>
+                </div>
                 <span className="text-white font-bold text-right">{total}</span>
               </div>
             )
