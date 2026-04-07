@@ -114,7 +114,11 @@ function DraftCard({ pokemon, picked, onPick }: {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold text-sm">{species.name}</span>
+            <span className="text-white font-bold text-sm">
+              {species.name}
+              {pokemon.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
+              {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
+            </span>
             {picked && <span className="text-green-400 text-xs font-bold">Picked!</span>}
           </div>
           <div className="flex gap-1 mt-1">

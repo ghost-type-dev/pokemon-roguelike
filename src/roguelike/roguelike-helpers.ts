@@ -107,7 +107,6 @@ export function pickRandomStarters(count: number): string[] {
 
 /** Create a PokemonSet for a starter */
 export function createStarterSet(speciesName: string): PokemonSet {
-  const species = getSpecies(speciesName)
   const abilities = getAbilities(speciesName)
   return {
     ...createEmptySet(),
@@ -117,7 +116,7 @@ export function createStarterSet(speciesName: string): PokemonSet {
     level: 50,
     ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
     evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
-    nature: species ? pickNatureForStats(species.baseStats as Record<StatID, number>) : 'Adamant',
+    nature: allNatures()[Math.floor(Math.random() * allNatures().length)].name,
     gender: randomGender(speciesName),
   }
 }
