@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Sprites } from '@pkmn/img'
 import { useRoguelikeStore } from './useRoguelikeStore'
-import { getAllLearnableMoves } from './roguelike-helpers'
+import { getAllLearnableMoves, getMovePowerCap } from './roguelike-helpers'
 import { getGen, getSpecies, getMove, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import type { RewardOption } from './constants'
 import { STAT_LABELS } from './constants'
@@ -89,7 +89,7 @@ export function RewardStage() {
     const allMoves = await getAllLearnableMoves(species)
     const alreadyKnown = new Set([...knownMoves, ...alreadyUnlocked])
     // Cap move power: next round's opponent cap + 15
-    const maxPower = 50 + 3 * (round + 1) + 15
+    const maxPower = getMovePowerCap(round + 1) + 10
     const unlearned = allMoves.filter(m => {
       if (alreadyKnown.has(m)) return false
       const md = getMove(m)

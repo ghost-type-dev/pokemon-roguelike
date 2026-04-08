@@ -129,6 +129,8 @@ export class HeuristicAI implements LocalAI {
   private opponentId = ''
   private opponent = new Map<string, OpponentPokemon>()
   private opponentActive: string | null = null
+  private currentTurn = 0
+  private mySwitchInTurn = 0  // turn when AI's active Pokemon switched in
   private field: FieldState = {
     weather: null, terrain: null,
     p1Hazards: new Set(), p2Hazards: new Set(),
@@ -140,6 +142,8 @@ export class HeuristicAI implements LocalAI {
     this.opponentId = playerId === 'p1' ? 'p2' : 'p1'
     this.opponent.clear()
     this.opponentActive = null
+    this.currentTurn = 0
+    this.mySwitchInTurn = 0
     this.field = {
       weather: null, terrain: null,
       p1Hazards: new Set(), p2Hazards: new Set(),
@@ -164,9 +168,18 @@ export class HeuristicAI implements LocalAI {
     const cmd = parts[1]
 
     switch (cmd) {
+      case 'turn': {
+        this.currentTurn = parseInt(parts[2] || '0')
+        break
+      }
       case 'switch':
       case 'drag': {
         const ident = parts[2] || ''
+        // Track our own switch-in turn
+        if (ident.startsWith(this.playerId)) {
+          this.mySwitchInTurn = this.currentTurn
+          break
+        }
         if (!ident.startsWith(this.opponentId)) break
         const details = parts[3] || ''
         const species = details.split(',')[0].trim()
@@ -374,6 +387,8 @@ export class HeuristicAI implements LocalAI {
       const calcMove = new Move(gen, move.id)
       if (calcMove.category === 'Status') return this.scoreStatusMove(move.id, myPoke, oppData)
       const moveData = gen.moves.get(move.id)
+      // Fake Out / First Impression: only work on the first turn after switching in
+      if ((move.id === 'fakeout' || move.id === 'firstimpression') && this.currentTurn !== this.mySwitchInTurn) return 0
       // Focus Punch fails if hit before executing — almost never works
       if (move.id === 'focuspunch') return 5
       // Dream Eater / Nightmare: only work on sleeping targets
@@ -412,11 +427,28 @@ export class HeuristicAI implements LocalAI {
 
   private scoreStatusMove(moveId: string, myPoke: any, oppData: OpponentPokemon): number {
     const moveName = moveId.toLowerCase()
+    // Get opponent types for immunity checks
+    const oppSpecies = gen.species.get(oppData.species as any)
+    const oppTypes = oppSpecies ? [...oppSpecies.types] : []
+
     const myHazards = this.playerId === 'p1' ? this.field.p2Hazards : this.field.p1Hazards
     if (moveName === 'stealthrock') return myHazards.has('Stealth Rock') ? 0 : 60
     if (moveName === 'spikes') return 40
     if (moveName === 'toxicspikes') return 35
     if (moveName === 'stickyweb') return myHazards.has('Sticky Web') ? 0 : 45
+
+    // Powder moves: Grass types are immune (Gen 6+)
+    const POWDER_MOVES = ['sleeppowder', 'stunspore', 'poisonpowder', 'spore', 'ragepowder', 'cottonspore']
+    if (POWDER_MOVES.includes(moveName) && oppTypes.includes('Grass')) return 0
+
+    // Thunder Wave: Electric types are immune
+    if (moveName === 'thunderwave' && oppTypes.includes('Electric')) return 0
+    // Will-O-Wisp: Fire types are immune to burn
+    if (moveName === 'willowisp' && oppTypes.includes('Fire')) return 0
+    // Toxic / Poison moves: Poison and Steel types are immune
+    if (['toxic', 'poisonpowder', 'toxicthread'].includes(moveName) && (oppTypes.includes('Poison') || oppTypes.includes('Steel'))) return 0
+    // Yawn: doesn't work on already-statused Pokemon (handled below) but also not on Grass for powder? No, Yawn is not powder.
+
     const STATUS_MOVES = ['thunderwave', 'glare', 'stunspore', 'toxic', 'willowisp', 'spore', 'sleeppowder', 'darkvoid', 'yawn', 'poisonpowder', 'toxicthread', 'nuzzle', 'hypnosis', 'sing', 'grasswhistle', 'lovelykiss']
     if (STATUS_MOVES.includes(moveName)) {
       if (oppData.status) return 0

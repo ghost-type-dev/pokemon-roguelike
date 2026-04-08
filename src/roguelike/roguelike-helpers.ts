@@ -125,6 +125,17 @@ export function createStarterSet(speciesName: string): PokemonSet {
 }
 
 /** Max team size based on round bracket */
+export function getMovePowerCap(round: number): number {
+  if (round <= 0) return 50
+  if (round <= 5) return 55
+  if (round <= 10) return 60
+  if (round <= 15) return 65
+  if (round <= 20) return 70
+  if (round <= 25) return 80
+  if (round <= 30) return 90
+  return Infinity
+}
+
 export function getMaxTeamSize(round: number): number {
   if (round <= 10) return 3
   if (round <= 20) return 4
@@ -287,7 +298,7 @@ export async function fillAIMoves(team: PokemonSet[], round = 0): Promise<Pokemo
   const gen = getGen(9)
   const smartSlots = getSmartMoveSlots(round)
   // Draft picks (round 0): cap at 50 BP. Opponent AI: cap at 50 + 3*round.
-  const maxMovePower = round === 0 ? 50 : 50 + 3 * round
+  const maxMovePower = getMovePowerCap(round)
   const result: PokemonSet[] = []
 
   for (const poke of team) {
