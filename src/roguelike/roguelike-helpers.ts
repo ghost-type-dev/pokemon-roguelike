@@ -207,7 +207,7 @@ function getCandidates(): SpeciesCandidate[] {
 
 /** Generate an AI team for a given round */
 export function generateAITeam(round: number): PokemonSet[] {
-  const targetBST = 280 + 10 * round
+  const targetBST = 250 + 11 * round
   const teamSize = getMaxTeamSize(round)
   const candidates = getCandidates()
 
