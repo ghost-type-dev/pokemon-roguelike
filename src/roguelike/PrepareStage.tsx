@@ -329,7 +329,7 @@ function PokemonPrepareEditor({
                       />
                     )}
                     <span className="text-white text-sm font-medium">{zhPokemon(evo.evoName)}</span>
-                    <span className="text-gray-500 text-xs ml-auto">BST {evo.evoBst}</span>
+                    <span className="text-gray-500 text-xs ml-auto">种族值 {evo.evoBst}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-600 rounded-full h-2">
@@ -441,14 +441,14 @@ function PokemonPrepareEditor({
               <label className="text-xs text-gray-400">Stats</label>
               <div className="flex items-center gap-2">
                 <span className={`text-xs font-medium ${evTotal >= 510 ? 'text-red-400' : 'text-gray-400'}`}>
-                  EVs: {evTotal} / 510
+                  努力值: {evTotal} / 510
                 </span>
                 {evDirty && (
                   <button
                     onClick={onEvSave}
                     className="text-xs px-2 py-0.5 rounded bg-green-600 hover:bg-green-500 text-white font-medium transition-colors"
                   >
-                    Save EVs
+                    保存
                   </button>
                 )}
               </div>
@@ -458,12 +458,12 @@ function PokemonPrepareEditor({
         <div className="bg-gray-700 rounded overflow-hidden">
           {/* Header row */}
           <div className="grid grid-cols-[3rem_1fr_2.5rem_2rem_5.5rem_3rem] gap-1 px-2 py-1 text-[10px] text-gray-500 border-b border-gray-600">
-            <span>Stat</span>
+            <span>能力</span>
             <span></span>
-            <span className="text-right">Base</span>
-            <span className="text-right">IV</span>
-            <span className="text-center">EV</span>
-            <span className="text-right">Total</span>
+            <span className="text-right">种族值</span>
+            <span className="text-right">个体值</span>
+            <span className="text-center">努力值</span>
+            <span className="text-right">实数值</span>
           </div>
           {STATS.map((stat) => {
             const ev = editedEvs[stat]

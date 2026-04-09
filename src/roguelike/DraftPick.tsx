@@ -47,7 +47,7 @@ export function DraftPick() {
       <h2 className="text-xl font-bold text-white">Draft Your Team</h2>
       <p className="text-gray-400 text-sm">
         Pick {remaining} more Pokemon to start your run.
-        <span className="text-gray-600 ml-1">(BST &lt; 330)</span>
+        <span className="text-gray-600 ml-1">（种族值 &lt; 330）</span>
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -191,7 +191,7 @@ function DraftCard({ pokemon, picked, onPick }: {
 
       {/* Stats */}
       <div>
-        <div className="text-[10px] text-gray-500 mb-0.5">Stats <span className="text-gray-600">(BST: {bst})</span></div>
+        <div className="text-[10px] text-gray-500 mb-0.5">能力值 <span className="text-gray-600">（种族值：{bst}）</span></div>
         {STATS.map((stat) => {
           const total = calcStat(stat, bs[stat], pokemon.ivs[stat], pokemon.evs[stat], pokemon.level, natureData || undefined)
           const isPlus = natureData?.plus === stat

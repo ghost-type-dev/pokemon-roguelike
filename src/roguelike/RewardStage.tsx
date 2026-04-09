@@ -7,6 +7,75 @@ import type { RewardOption } from './constants'
 import { STAT_LABELS } from './constants'
 import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
+
+const ZH_STAT_FULL: Record<StatID, string> = {
+  hp: 'HP', atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度',
+}
+
+const ZH_NATURE: Record<string, string> = {
+  Hardy: '勤奋', Lonely: '孤独', Brave: '勇敢', Adamant: '固执', Naughty: '顽皮',
+  Bold: '大胆', Docile: '坦率', Relaxed: '悠闲', Impish: '淘气', Lax: '乐天',
+  Timid: '胆小', Hasty: '急躁', Serious: '认真', Jolly: '爽朗', Naive: '天真',
+  Modest: '内敛', Mild: '温和', Quiet: '冷静', Bashful: '害羞', Rash: '马虎',
+  Calm: '温顺', Gentle: '温柔', Sassy: '自大', Careful: '慎重', Quirky: '浮躁',
+}
+
+function getRewardLabel(reward: RewardOption): string {
+  switch (reward.type) {
+    case 'item':
+      return reward.itemName ? `道具：${zhItem(reward.itemName)}` : reward.label
+    case 'tm':
+      return '学习新技能'
+    case 'ability': {
+      const m = reward.label.match(/^Ability: (.+)$/)
+      return m ? `特性：${zhAbility(m[1])}` : reward.label
+    }
+    case 'ev-boost':
+      return reward.stat ? `+80 ${ZH_STAT_FULL[reward.stat]}努力值` : reward.label
+    case 'nature':
+      return reward.natureName ? `性格：${ZH_NATURE[reward.natureName] ?? reward.natureName}` : reward.label
+    case 'new-pokemon':
+      return reward.pokemonSpecies ? `招募：${zhPokemon(reward.pokemonSpecies)}` : reward.label
+    default:
+      return reward.label
+  }
+}
+
+function getRewardDesc(reward: RewardOption): string {
+  switch (reward.type) {
+    case 'item':
+      return reward.itemName ? `将 ${zhItem(reward.itemName)} 加入道具栏。` : reward.description
+    case 'tm':
+      return '选择一只精灵并教它一个新技能。'
+    case 'ability': {
+      const m = reward.label.match(/^Ability: (.+)$/)
+      const zhAb = m ? zhAbility(m[1]) : ''
+      return reward.targetSpecies
+        ? `将 ${zhPokemon(reward.targetSpecies)} 的特性改为${zhAb}。`
+        : reward.description
+    }
+    case 'ev-boost':
+      return reward.stat && reward.targetSpecies
+        ? `为 ${zhPokemon(reward.targetSpecies)} 的${ZH_STAT_FULL[reward.stat]}增加 80 努力值。`
+        : reward.description
+    case 'nature': {
+      if (!reward.targetSpecies || !reward.natureName) return reward.description
+      const zhNatureName = ZH_NATURE[reward.natureName] ?? reward.natureName
+      const nd = allNatures().find(n => n.name === reward.natureName)
+      const effect = nd?.plus && nd?.minus
+        ? `（+${ZH_STAT_FULL[nd.plus]}，-${ZH_STAT_FULL[nd.minus]}）`
+        : '（中性）'
+      return `将 ${zhPokemon(reward.targetSpecies)} 的性格改为${zhNatureName}${effect}。`
+    }
+    case 'new-pokemon':
+      if (!reward.pokemonSpecies) return reward.description
+      return reward.description.includes('Replace')
+        ? `用击败队伍中的 ${zhPokemon(reward.pokemonSpecies)} 替换一名队员。`
+        : `将击败队伍中的 ${zhPokemon(reward.pokemonSpecies)} 加入队伍。`
+    default:
+      return reward.description
+  }
+}
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
 function getItemDescription(itemName: string): string {
@@ -159,10 +228,10 @@ export function RewardStage() {
                 <div className="flex items-center gap-2 mb-1">
                   <RewardIcon type={reward.type} />
                   <span className="text-white font-bold text-sm">
-                    {reward.type === 'item' && reward.itemName ? `Item: ${zhItem(reward.itemName)}` : reward.label}
+                    {getRewardLabel(reward)}
                   </span>
                 </div>
-                <p className="text-gray-400 text-xs">{reward.description}</p>
+                <p className="text-gray-400 text-xs">{getRewardDesc(reward)}</p>
                 {extraDesc && (
                   <p className="text-gray-500 text-xs mt-1 italic">{extraDesc}</p>
                 )}
@@ -177,8 +246,8 @@ export function RewardStage() {
                       ) : null
                     })()}
                     <span className="text-gray-500 text-xs">
-                      {reward.targetSpecies}
-                      {reward.type === 'ev-boost' && reward.stat && ` · ${STAT_LABELS[reward.stat]}`}
+                      {zhPokemon(reward.targetSpecies)}
+                      {reward.type === 'ev-boost' && reward.stat && ` · ${ZH_STAT_FULL[reward.stat]}`}
                     </span>
                   </div>
                 )}
@@ -287,9 +356,9 @@ export function RewardStage() {
       {selectedReward && selectedReward.type !== 'tm' && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
           <h3 className="text-white font-bold">
-            {selectedReward.type === 'item' && selectedReward.itemName ? `Item: ${zhItem(selectedReward.itemName)}` : selectedReward.label}
+            {getRewardLabel(selectedReward)}
           </h3>
-          <p className="text-gray-400 text-sm">{selectedReward.description}</p>
+          <p className="text-gray-400 text-sm">{getRewardDesc(selectedReward)}</p>
 
           {/* Show item description */}
           {selectedReward.type === 'item' && selectedReward.itemName && (
@@ -344,7 +413,7 @@ export function RewardStage() {
                           style={{ imageRendering: sprite.pixelated ? 'pixelated' : 'auto' }} />
                       )}
                       <span className="text-white text-sm font-medium">{zhPokemon(p.species)}</span>
-                      <span className="text-gray-500 text-xs">BST {bst}</span>
+                      <span className="text-gray-500 text-xs">种族值 {bst}</span>
                       <span className="text-gray-600 text-xs ml-auto">
                         {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ')}
                       </span>
@@ -467,7 +536,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
               </div>
               <div className="text-white font-bold">{total}</div>
               {pokemon.evs[stat] > 0 && (
-                <div className="text-green-500">{pokemon.evs[stat]}ev</div>
+                <div className="text-green-500">{pokemon.evs[stat]}努</div>
               )}
             </div>
           )
