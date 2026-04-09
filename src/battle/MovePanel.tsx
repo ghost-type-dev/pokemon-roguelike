@@ -1,5 +1,6 @@
 import { useBattleStore } from './useBattleStore'
 import { battleManager } from '../engine/BattleManager'
+import { zhPokemon, zhMove } from '../i18n/zh-helpers'
 
 const TYPE_COLORS: Record<string, string> = {
   Normal: 'bg-gray-500 hover:bg-gray-400',
@@ -67,7 +68,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
   return (
     <div className="bg-gray-800 rounded-lg p-4 space-y-3">
       <div className="text-sm text-gray-400">
-        What will <span className="text-white font-bold">{currentPokemon.ident.split(': ')[1]}</span> do?
+        <span className="text-white font-bold">{zhPokemon(currentPokemon.ident.split(': ')[1])}</span> 要做什么？
       </div>
 
       {/* Moves */}
@@ -83,7 +84,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
               className={`${disabled ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : getMoveColor(move.type || 'Normal')}
                 text-white font-medium py-3 px-4 rounded-lg text-left transition-colors`}
             >
-              <div className="font-bold text-sm">{move.move}</div>
+              <div className="font-bold text-sm">{zhMove(move.move)}</div>
               <div className="text-xs opacity-80 flex justify-between mt-0.5">
                 <span>{move.type}</span>
                 {pp && <span>PP {pp}</span>}
@@ -113,7 +114,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
                     : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }`}
               >
-                <div className="font-medium">{poke.ident.split(': ')[1]}</div>
+                <div className="font-medium">{zhPokemon(poke.ident.split(': ')[1])}</div>
                 <div className="text-xs text-gray-400">
                   {fainted ? 'Fainted' : `${hp}%`}
                 </div>

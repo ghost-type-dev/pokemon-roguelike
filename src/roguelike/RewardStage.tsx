@@ -5,6 +5,7 @@ import { getAllLearnableMoves, getMovePowerCap } from './roguelike-helpers'
 import { getGen, getSpecies, getMove, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import type { RewardOption } from './constants'
 import { STAT_LABELS } from './constants'
+import { zhPokemon, zhMove, zhItem, zhAbility } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
@@ -204,8 +205,8 @@ export function RewardStage() {
                       style={{ imageRendering: sprite.pixelated ? 'pixelated' : 'auto' }}
                     />
                   )}
-                  <span className="text-white text-sm font-medium">{p.species}</span>
-                  <span className="text-gray-500 text-xs ml-auto">{p.moves.filter(Boolean).join(', ')}</span>
+                  <span className="text-white text-sm font-medium">{zhPokemon(p.species)}</span>
+                  <span className="text-gray-500 text-xs ml-auto">{p.moves.filter(Boolean).map(m => zhMove(m)).join(', ')}</span>
                 </button>
               )
             })}
@@ -214,7 +215,7 @@ export function RewardStage() {
       )}
       {selectedReward?.type === 'tm' && tmTargetSpecies && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
-          <h3 className="text-white font-bold">New Move for {tmTargetSpecies}</h3>
+          <h3 className="text-white font-bold">New Move for {zhPokemon(tmTargetSpecies)}</h3>
 
           {loadingTMs ? (
             <div className="text-gray-400 animate-pulse">Loading moves...</div>
@@ -250,7 +251,7 @@ export function RewardStage() {
                             {md.type}
                           </span>
                         )}
-                        <span className="text-white text-sm">{m}</span>
+                        <span className="text-white text-sm">{zhMove(m)}</span>
                         {md && (
                           <span className="text-gray-500 text-xs ml-auto">
                             {md.category === 'Status' ? 'Status' : `${md.basePower > 0 ? md.basePower + 'bp' : '—'} ${md.category}`}
@@ -334,10 +335,10 @@ export function RewardStage() {
                           className="object-contain"
                           style={{ imageRendering: sprite.pixelated ? 'pixelated' : 'auto' }} />
                       )}
-                      <span className="text-white text-sm font-medium">{p.species}</span>
+                      <span className="text-white text-sm font-medium">{zhPokemon(p.species)}</span>
                       <span className="text-gray-500 text-xs">BST {bst}</span>
                       <span className="text-gray-600 text-xs ml-auto">
-                        {p.moves.filter(Boolean).join(', ')}
+                        {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ')}
                       </span>
                     </button>
                   )
@@ -409,7 +410,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold text-sm">{species.name}</span>
+            <span className="text-white font-bold text-sm">{zhPokemon(species.name)}</span>
             {species.types.map((t: string) => (
               <span key={t} className={`${TYPE_COLORS[t] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}>
                 {t}
@@ -417,7 +418,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
             ))}
           </div>
           <div className="text-gray-500 text-xs">
-            {pokemon.ability && <span>{pokemon.ability}</span>}
+            {pokemon.ability && <span>{zhAbility(pokemon.ability)}</span>}
             {abilityData?.shortDesc && <span className="text-gray-600"> — {abilityData.shortDesc}</span>}
           </div>
           <div className="text-gray-500 text-xs">
@@ -425,7 +426,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
             {natureData?.plus && natureData?.minus && (
               <span> (<span className="text-green-400">+{STAT_LABELS[natureData.plus]}</span> / <span className="text-red-400">-{STAT_LABELS[natureData.minus]}</span>)</span>
             )}
-            {pokemon.item && <span> · {pokemon.item}</span>}
+            {pokemon.item && <span> · {zhItem(pokemon.item)}</span>}
           </div>
         </div>
       </div>
@@ -437,7 +438,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
           return (
             <span key={i} className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 rounded">
               {md && <span className={`${TYPE_COLORS[md.type] || 'bg-gray-500'} text-white text-[9px] font-bold px-1 py-0 rounded mr-1`}>{md.type}</span>}
-              {move}
+              {zhMove(move)}
               {md && md.basePower > 0 && <span className="text-gray-500 ml-1">{md.basePower}bp</span>}
             </span>
           )

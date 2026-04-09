@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Sprites } from '@pkmn/img'
 import { useBattleStore } from './useBattleStore'
 import { getGen } from '../teambuilder/dex-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility } from '../i18n/zh-helpers'
 
 const STAT_LABELS: Record<string, string> = {
   atk: 'Atk',
@@ -11,17 +12,6 @@ const STAT_LABELS: Record<string, string> = {
   spe: 'Spe',
 }
 
-function formatItemName(id: string): string {
-  return id.replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/^./, c => c.toUpperCase())
-    .replace(/([a-z])([a-z]*)/g, (_, first, rest) => first.toUpperCase() + rest)
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-}
-
-function formatMoveName(id: string): string {
-  return id.replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/^./, c => c.toUpperCase())
-}
 
 const TYPE_COLORS: Record<string, string> = {
   Normal: 'bg-gray-400',
@@ -111,7 +101,7 @@ export function TeamPanel() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-white text-sm font-medium truncate">{name}</span>
+                        <span className="text-white text-sm font-medium truncate">{zhPokemon(name)}</span>
                         {gender === 'M' && <span className="text-blue-400 text-sm">♂</span>}
                         {gender === 'F' && <span className="text-pink-400 text-sm">♀</span>}
                         {lookupTypes(species).map((t: string) => (
@@ -151,7 +141,7 @@ export function TeamPanel() {
                     <div>
                       <span className="text-gray-500">Item: </span>
                       <span className="text-amber-300">
-                        {poke.item ? formatItemName(poke.item) : 'None'}
+                        {poke.item ? zhItem(poke.item) : 'None'}
                       </span>
                     </div>
                     {poke.item && (() => {
@@ -167,7 +157,7 @@ export function TeamPanel() {
                     <div>
                       <span className="text-gray-500">Ability: </span>
                       <span className="text-indigo-300">
-                        {formatItemName(poke.ability)}
+                        {zhAbility(poke.ability)}
                       </span>
                     </div>
                     {(() => {
@@ -197,7 +187,7 @@ export function TeamPanel() {
                         return (
                           <div key={j} className="bg-gray-700 rounded px-2 py-1">
                             <div className="flex items-center justify-between">
-                              <span className="text-gray-200">{moveData?.name || formatMoveName(move)}</span>
+                              <span className="text-gray-200">{zhMove(moveData?.name || move)}</span>
                               {moveData && (
                                 <span className="text-gray-500">
                                   {moveData.category !== 'Status' ? `${moveData.basePower} BP` : 'Status'}

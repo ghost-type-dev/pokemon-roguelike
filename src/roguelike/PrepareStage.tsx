@@ -7,6 +7,7 @@ import { MoveSelect } from './MoveSelect'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { getMaxTeamSize, getEvolutionProgress } from './roguelike-helpers'
 import { STAT_LABELS } from './constants'
+import { zhPokemon, zhMove, zhItem, zhAbility } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -143,12 +144,12 @@ export function PrepareStage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-white text-sm font-medium truncate">
-                        {p.species}
+                        {zhPokemon(p.species)}
                         {p.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
                         {p.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
                       </div>
                       <div className="text-gray-400 text-xs truncate">
-                        {p.moves.filter(Boolean).join(', ') || 'No moves'}
+                        {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ') || 'No moves'}
                       </div>
                     </div>
                   </div>
@@ -169,8 +170,8 @@ export function PrepareStage() {
                   const desc = itemData?.shortDesc || itemData?.desc || ''
                   return (
                     <div key={i} className={`text-xs px-2 py-1 rounded ${holder ? 'bg-gray-800 text-gray-500' : 'bg-gray-700 text-gray-300'}`}>
-                      <span className={holder ? 'line-through' : ''}>{item}</span>
-                      {holder && <span className="ml-1 text-gray-600">({holder.species})</span>}
+                      <span className={holder ? 'line-through' : ''}>{zhItem(item)}</span>
+                      {holder && <span className="ml-1 text-gray-600">({zhPokemon(holder.species)})</span>}
                       {desc && <div className={`mt-0.5 ${holder ? 'text-gray-600' : 'text-gray-500'}`}>{desc}</div>}
                     </div>
                   )
@@ -289,7 +290,7 @@ function PokemonPrepareEditor({
         </div>
         <div className="flex-1">
           <div className="text-white font-bold text-lg">
-            {species.name}
+            {zhPokemon(species.name)}
             {pokemon.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
             {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
           </div>
@@ -327,7 +328,7 @@ function PokemonPrepareEditor({
                         style={{ imageRendering: evoSprite.pixelated ? 'pixelated' : 'auto' }}
                       />
                     )}
-                    <span className="text-white text-sm font-medium">{evo.evoName}</span>
+                    <span className="text-white text-sm font-medium">{zhPokemon(evo.evoName)}</span>
                     <span className="text-gray-500 text-xs ml-auto">BST {evo.evoBst}</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -360,7 +361,7 @@ function PokemonPrepareEditor({
       <div>
         <label className="block text-xs text-gray-400 mb-1">Ability</label>
         <div className="bg-gray-700 rounded px-3 py-2">
-          <div className="text-white text-sm font-medium">{pokemon.ability}</div>
+          <div className="text-white text-sm font-medium">{zhAbility(pokemon.ability)}</div>
           {abilityData?.shortDesc && (
             <div className="text-gray-400 text-xs mt-0.5">{abilityData.shortDesc}</div>
           )}

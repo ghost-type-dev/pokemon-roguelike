@@ -3,6 +3,7 @@ import { Sprites } from '@pkmn/img'
 import { getSpecies, getMove, getGen, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { STAT_LABELS } from './constants'
+import { zhPokemon, zhMove, zhAbility } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
@@ -115,7 +116,7 @@ function DraftCard({ pokemon, picked, onPick }: {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-white font-bold text-sm">
-              {species.name}
+              {zhPokemon(species.name)}
               {pokemon.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
               {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
             </span>
@@ -134,7 +135,7 @@ function DraftCard({ pokemon, picked, onPick }: {
           {/* Ability */}
           <div className="mt-1">
             <span className="text-gray-400 text-[10px]">Ability: </span>
-            <span className="text-white text-[10px] font-medium">{pokemon.ability}</span>
+            <span className="text-white text-[10px] font-medium">{zhAbility(pokemon.ability)}</span>
             {abilityData?.shortDesc && (
               <div className="text-gray-500 text-[10px]">{abilityData.shortDesc}</div>
             )}
@@ -167,7 +168,7 @@ function DraftCard({ pokemon, picked, onPick }: {
                 <span className={`${MOVE_TYPE_COLORS[md!.type] || 'bg-gray-500'} text-[9px] font-bold px-1 rounded w-12 text-center truncate`}>
                   {md!.type}
                 </span>
-                <span className="text-white truncate flex-1">{md!.name}</span>
+                <span className="text-white truncate flex-1">{zhMove(md!.name)}</span>
                 {md!.basePower > 0 && (
                   <span className="text-gray-400 flex-shrink-0">{md!.basePower}</span>
                 )}

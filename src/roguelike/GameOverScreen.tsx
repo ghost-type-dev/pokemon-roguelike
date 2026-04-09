@@ -1,5 +1,6 @@
 import { Sprites } from '@pkmn/img'
 import { useRoguelikeStore } from './useRoguelikeStore'
+import { zhPokemon, zhItem } from '../i18n/zh-helpers'
 
 export function GameOverScreen() {
   const roundsWon = useRoguelikeStore((s) => s.roundsWon)
@@ -48,8 +49,8 @@ export function GameOverScreen() {
                     style={{ imageRendering: sprite.pixelated ? 'pixelated' : 'auto' }}
                   />
                 )}
-                <span className="text-white text-sm font-medium">{p.species}</span>
-                <span className="text-gray-400 text-xs">{p.item || 'No item'}</span>
+                <span className="text-white text-sm font-medium">{zhPokemon(p.species)}</span>
+                <span className="text-gray-400 text-xs">{p.item ? zhItem(p.item) : 'No item'}</span>
               </div>
             )
           })}
