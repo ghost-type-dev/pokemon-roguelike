@@ -154,7 +154,9 @@ export function RewardStage() {
               >
                 <div className="flex items-center gap-2 mb-1">
                   <RewardIcon type={reward.type} />
-                  <span className="text-white font-bold text-sm">{reward.label}</span>
+                  <span className="text-white font-bold text-sm">
+                    {reward.type === 'item' && reward.itemName ? `Item: ${zhItem(reward.itemName)}` : reward.label}
+                  </span>
                 </div>
                 <p className="text-gray-400 text-xs">{reward.description}</p>
                 {extraDesc && (
@@ -280,7 +282,9 @@ export function RewardStage() {
       {/* Confirmation for item, ability, new-pokemon */}
       {selectedReward && selectedReward.type !== 'tm' && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
-          <h3 className="text-white font-bold">{selectedReward.label}</h3>
+          <h3 className="text-white font-bold">
+            {selectedReward.type === 'item' && selectedReward.itemName ? `Item: ${zhItem(selectedReward.itemName)}` : selectedReward.label}
+          </h3>
           <p className="text-gray-400 text-sm">{selectedReward.description}</p>
 
           {/* Show item description */}

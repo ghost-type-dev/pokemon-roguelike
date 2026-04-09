@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { getMove } from '../teambuilder/dex-helpers'
+import { zhMove } from '../i18n/zh-helpers'
 
 const TYPE_COLORS: Record<string, string> = {
   Normal: 'bg-gray-400', Fire: 'bg-red-500', Water: 'bg-blue-500',
@@ -97,7 +98,7 @@ export function MoveSelect({ value, options, onChange, placeholder }: MoveSelect
             <span className={`${TYPE_COLORS[selectedInfo.type] || 'bg-gray-500'} text-white text-[10px] font-bold px-1 py-0 rounded flex-shrink-0`}>
               {selectedInfo.type}
             </span>
-            <span className="text-white truncate">{value}</span>
+            <span className="text-white truncate">{zhMove(value)}</span>
             <span className="text-gray-400 text-xs flex-shrink-0">
               {selectedInfo.basePower > 0 ? `${selectedInfo.basePower}bp` : selectedInfo.category}
             </span>
@@ -144,7 +145,7 @@ export function MoveSelect({ value, options, onChange, placeholder }: MoveSelect
                       {info.type}
                     </span>
                   )}
-                  <span className="truncate">{opt}</span>
+                  <span className="truncate">{zhMove(opt)}</span>
                   {info && (
                     <span className={`text-xs ml-auto flex-shrink-0 ${i === highlightIndex ? 'text-blue-200' : 'text-gray-500'}`}>
                       {info.category === 'Status' ? 'Status' : `${info.basePower > 0 ? info.basePower + 'bp' : '—'} ${info.category}`}

@@ -395,6 +395,7 @@ function PokemonPrepareEditor({
         options={ownedItems}
         onChange={(item) => onItemChange(slotIndex, item)}
         placeholder="No item (pick from inventory)"
+        formatLabel={zhItem}
       />
 
       {/* Moves with descriptions */}
