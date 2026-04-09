@@ -7,7 +7,7 @@ import { MoveSelect } from './MoveSelect'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { getMaxTeamSize, getEvolutionProgress } from './roguelike-helpers'
 import { STAT_LABELS } from './constants'
-import { zhPokemon, zhMove, zhItem, zhAbility } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -167,7 +167,7 @@ export function PrepareStage() {
                   const holder = roster.find(p => p.item === item)
                   const gen = getGen(9)
                   const itemData = gen.items.get(item)
-                  const desc = itemData?.shortDesc || itemData?.desc || ''
+                  const desc = zhItemDesc(item) || itemData?.shortDesc || itemData?.desc || ''
                   return (
                     <div key={i} className={`text-xs px-2 py-1 rounded ${holder ? 'bg-gray-800 text-gray-500' : 'bg-gray-700 text-gray-300'}`}>
                       <span className={holder ? 'line-through' : ''}>{zhItem(item)}</span>
@@ -362,8 +362,8 @@ function PokemonPrepareEditor({
         <label className="block text-xs text-gray-400 mb-1">Ability</label>
         <div className="bg-gray-700 rounded px-3 py-2">
           <div className="text-white text-sm font-medium">{zhAbility(pokemon.ability)}</div>
-          {abilityData?.shortDesc && (
-            <div className="text-gray-400 text-xs mt-0.5">{abilityData.shortDesc}</div>
+          {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && (
+            <div className="text-gray-400 text-xs mt-0.5">{zhAbilityDesc(pokemon.ability) || abilityData!.shortDesc}</div>
           )}
         </div>
       </div>
@@ -417,7 +417,7 @@ function PokemonPrepareEditor({
                 />
                 {md && (
                   <div className="mt-0.5 px-2 text-xs text-gray-500">
-                    {md.shortDesc}
+                    {zhMoveDesc(move) || md.shortDesc}
                     <span className="ml-2 text-gray-600">
                       {md.category === 'Physical' ? '⚔ Physical' : md.category === 'Special' ? '✦ Special' : '◎ Status'}
                       {md.accuracy === true ? '' : ` · ${md.accuracy}% acc`}

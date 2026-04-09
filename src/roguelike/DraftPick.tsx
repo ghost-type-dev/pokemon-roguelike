@@ -3,7 +3,7 @@ import { Sprites } from '@pkmn/img'
 import { getSpecies, getMove, getGen, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { STAT_LABELS } from './constants'
-import { zhPokemon, zhMove, zhAbility } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhAbility, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
@@ -136,8 +136,8 @@ function DraftCard({ pokemon, picked, onPick }: {
           <div className="mt-1">
             <span className="text-gray-400 text-[10px]">Ability: </span>
             <span className="text-white text-[10px] font-medium">{zhAbility(pokemon.ability)}</span>
-            {abilityData?.shortDesc && (
-              <div className="text-gray-500 text-[10px]">{abilityData.shortDesc}</div>
+            {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && (
+              <div className="text-gray-500 text-[10px]">{zhAbilityDesc(pokemon.ability) || abilityData!.shortDesc}</div>
             )}
           </div>
           {/* Nature */}
@@ -179,8 +179,8 @@ function DraftCard({ pokemon, picked, onPick }: {
                   {md!.category === 'Physical' ? 'Phys' : md!.category === 'Special' ? 'Spec' : 'Stat'}
                 </span>
               </div>
-              {md!.shortDesc && (
-                <div className="text-gray-500 pl-[3.375rem] mt-0.5">{md!.shortDesc}</div>
+              {(zhMoveDesc(md!.name) || md!.shortDesc) && (
+                <div className="text-gray-500 pl-[3.375rem] mt-0.5">{zhMoveDesc(md!.name) || md!.shortDesc}</div>
               )}
             </div>
           )) : (

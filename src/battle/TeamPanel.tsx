@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Sprites } from '@pkmn/img'
 import { useBattleStore } from './useBattleStore'
 import { getGen } from '../teambuilder/dex-helpers'
-import { zhPokemon, zhMove, zhItem, zhAbility } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
 
 const STAT_LABELS: Record<string, string> = {
   atk: 'Atk',
@@ -146,8 +146,9 @@ export function TeamPanel() {
                     </div>
                     {poke.item && (() => {
                       const itemData = lookupItem(poke.item)
-                      return itemData?.shortDesc ? (
-                        <div className="text-gray-500 ml-2 mt-0.5 italic">{itemData.shortDesc}</div>
+                      const itemDesc = zhItemDesc(poke.item) || itemData?.shortDesc
+                      return itemDesc ? (
+                        <div className="text-gray-500 ml-2 mt-0.5 italic">{itemDesc}</div>
                       ) : null
                     })()}
                   </div>
@@ -162,8 +163,9 @@ export function TeamPanel() {
                     </div>
                     {(() => {
                       const abilityData = lookupAbility(poke.ability)
-                      return abilityData?.shortDesc ? (
-                        <div className="text-gray-500 ml-2 mt-0.5 italic">{abilityData.shortDesc}</div>
+                      const abilityDesc = zhAbilityDesc(poke.ability) || abilityData?.shortDesc
+                      return abilityDesc ? (
+                        <div className="text-gray-500 ml-2 mt-0.5 italic">{abilityDesc}</div>
                       ) : null
                     })()}
                   </div>
@@ -196,8 +198,8 @@ export function TeamPanel() {
                                 </span>
                               )}
                             </div>
-                            {moveData?.shortDesc && (
-                              <div className="text-gray-500 mt-0.5 italic">{moveData.shortDesc}</div>
+                            {(zhMoveDesc(moveData?.name || move) || moveData?.shortDesc) && (
+                              <div className="text-gray-500 mt-0.5 italic">{zhMoveDesc(moveData?.name || move) || moveData!.shortDesc}</div>
                             )}
                           </div>
                         )

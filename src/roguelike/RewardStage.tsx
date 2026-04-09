@@ -5,17 +5,21 @@ import { getAllLearnableMoves, getMovePowerCap } from './roguelike-helpers'
 import { getGen, getSpecies, getMove, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import type { RewardOption } from './constants'
 import { STAT_LABELS } from './constants'
-import { zhPokemon, zhMove, zhItem, zhAbility } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
 function getItemDescription(itemName: string): string {
+  const zh = zhItemDesc(itemName)
+  if (zh) return zh
   const gen = getGen(9)
   const item = gen.items.get(itemName)
   return item?.shortDesc || item?.desc || ''
 }
 
 function getAbilityDescription(abilityName: string): string {
+  const zh = zhAbilityDesc(abilityName)
+  if (zh) return zh
   const gen = getGen(9)
   const ability = gen.abilities.get(abilityName)
   return ability?.shortDesc || ability?.desc || ''
@@ -260,8 +264,8 @@ export function RewardStage() {
                           </span>
                         )}
                       </div>
-                      {md?.shortDesc && (
-                        <div className="text-gray-500 text-xs mt-0.5">{md.shortDesc}</div>
+                      {(zhMoveDesc(m) || md?.shortDesc) && (
+                        <div className="text-gray-500 text-xs mt-0.5">{zhMoveDesc(m) || md!.shortDesc}</div>
                       )}
                     </button>
                   )
@@ -423,7 +427,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
           </div>
           <div className="text-gray-500 text-xs">
             {pokemon.ability && <span>{zhAbility(pokemon.ability)}</span>}
-            {abilityData?.shortDesc && <span className="text-gray-600"> — {abilityData.shortDesc}</span>}
+            {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && <span className="text-gray-600"> — {zhAbilityDesc(pokemon.ability) || abilityData!.shortDesc}</span>}
           </div>
           <div className="text-gray-500 text-xs">
             {pokemon.nature}

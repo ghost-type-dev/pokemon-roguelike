@@ -2,6 +2,9 @@ import { pokemonzh } from './pokemon-zh'
 import { movezh } from './move-zh'
 import { itemzh } from './item-zh'
 import { abilityzh } from './ability-zh'
+import { itemdeschzh } from './item-desc-zh'
+import { abilitydeschzh } from './ability-desc-zh'
+import { movedeschzh } from './move-desc-zh'
 
 /** Normalize a display name to PokeAPI kebab-case key */
 function toKey(name: string): string {
@@ -26,6 +29,21 @@ export function zhItem(name: string): string {
 /** Translate an ability name to Chinese. Falls back to English. */
 export function zhAbility(name: string): string {
   return abilityzh[toKey(name) as keyof typeof abilityzh] ?? name
+}
+
+/** Chinese flavor text description for an item. Returns null if not available. */
+export function zhItemDesc(name: string): string | null {
+  return itemdeschzh[toKey(name) as keyof typeof itemdeschzh] ?? null
+}
+
+/** Chinese flavor text description for an ability. Returns null if not available. */
+export function zhAbilityDesc(name: string): string | null {
+  return abilitydeschzh[toKey(name) as keyof typeof abilitydeschzh] ?? null
+}
+
+/** Chinese flavor text description for a move. Returns null if not available. */
+export function zhMoveDesc(name: string): string | null {
+  return movedeschzh[toKey(name) as keyof typeof movedeschzh] ?? null
 }
 
 /**
