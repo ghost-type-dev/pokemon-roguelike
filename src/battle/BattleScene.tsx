@@ -6,6 +6,7 @@ import { formatLine } from './formatLine'
 import { useLanguage } from '../i18n/useLanguage'
 import { useT, type Strings } from '../i18n/strings'
 import { zhPokemon } from '../i18n/zh-helpers'
+import { Dex } from '@pkmn/dex'
 
 /** Translate the stored p1/p2 player labels for display. */
 function translatePlayerLabel(name: string, t: Strings): string {
@@ -329,6 +330,7 @@ export function BattleScene() {
             level={p2.level}
             status={p2.status}
             gender={p2.gender}
+            types={Dex.species.get(p2.species)?.types}
           />
         )}
       </div>
@@ -352,6 +354,7 @@ export function BattleScene() {
             level={p1.level}
             status={p1.status}
             gender={p1.gender}
+            types={Dex.species.get(p1.species)?.types}
           />
         )}
       </div>
