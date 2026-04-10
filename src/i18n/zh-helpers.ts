@@ -5,6 +5,9 @@ import { abilityzh } from './ability-zh'
 import { itemdeschzh } from './item-desc-zh'
 import { abilitydeschzh } from './ability-desc-zh'
 import { movedeschzh } from './move-desc-zh'
+import { itemdeschwikizh } from './item-desc-zh-wiki'
+import { abilitydeschwikizh } from './ability-desc-zh-wiki'
+import { movedeschwikizh } from './move-desc-zh-wiki'
 import { getLanguage } from './useLanguage'
 
 /** Normalize a display name to PokeAPI kebab-case key */
@@ -186,19 +189,28 @@ export function zhAbility(name: string): string {
 /** Localized flavor text for an item. Returns null if not available (or in English mode — caller falls back to dex). */
 export function zhItemDesc(name: string): string | null {
   if (getLanguage() === 'en') return null
-  return itemdeschzh[toKey(name) as keyof typeof itemdeschzh] ?? null
+  const key = toKey(name)
+  return (itemdeschzh[key as keyof typeof itemdeschzh]
+    ?? itemdeschwikizh[key as keyof typeof itemdeschwikizh]
+    ?? null)
 }
 
 /** Localized flavor text for an ability. Returns null if not available. */
 export function zhAbilityDesc(name: string): string | null {
   if (getLanguage() === 'en') return null
-  return abilitydeschzh[toKey(name) as keyof typeof abilitydeschzh] ?? null
+  const key = toKey(name)
+  return (abilitydeschzh[key as keyof typeof abilitydeschzh]
+    ?? abilitydeschwikizh[key as keyof typeof abilitydeschwikizh]
+    ?? null)
 }
 
 /** Localized flavor text for a move. Returns null if not available. */
 export function zhMoveDesc(name: string): string | null {
   if (getLanguage() === 'en') return null
-  return movedeschzh[toKey(name) as keyof typeof movedeschzh] ?? null
+  const key = toKey(name)
+  return (movedeschzh[key as keyof typeof movedeschzh]
+    ?? movedeschwikizh[key as keyof typeof movedeschwikizh]
+    ?? null)
 }
 
 /**

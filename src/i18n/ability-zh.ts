@@ -34,7 +34,7 @@ export const abilityzh = {
   'cloud-nine': '无关天气',
   'color-change': '变色',
   'comatose': '绝对睡眠',
-  'commander': '银河队干部',
+  'commander': '发号施令',
   'competitive': '好胜',
   'compound-eyes': '复眼',
   'contrary': '唱反调',
