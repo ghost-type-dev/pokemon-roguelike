@@ -6,9 +6,8 @@ A browser-based Pokemon roguelike built with React, TypeScript, and [`@pkmn/sim`
 
 You can play the current live build here:
 
-```text
-http://8.209.213.246
-```
+[Pokemon Roguelike](http://8.209.213.246)
+
 
 ## Features
 
