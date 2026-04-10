@@ -7,6 +7,7 @@ import { MoveSelect } from './MoveSelect'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { getMaxTeamSize, getEvolutionProgress } from './roguelike-helpers'
 import { STAT_LABELS } from './constants'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
 import type { StatID } from '@pkmn/data'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -143,12 +144,12 @@ export function PrepareStage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-white text-sm font-medium truncate">
-                        {p.species}
+                        {zhPokemon(p.species)}
                         {p.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
                         {p.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
                       </div>
                       <div className="text-gray-400 text-xs truncate">
-                        {p.moves.filter(Boolean).join(', ') || 'No moves'}
+                        {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ') || 'No moves'}
                       </div>
                     </div>
                   </div>
@@ -166,11 +167,11 @@ export function PrepareStage() {
                   const holder = roster.find(p => p.item === item)
                   const gen = getGen(9)
                   const itemData = gen.items.get(item)
-                  const desc = itemData?.shortDesc || itemData?.desc || ''
+                  const desc = zhItemDesc(item) || itemData?.shortDesc || itemData?.desc || ''
                   return (
                     <div key={i} className={`text-xs px-2 py-1 rounded ${holder ? 'bg-gray-800 text-gray-500' : 'bg-gray-700 text-gray-300'}`}>
-                      <span className={holder ? 'line-through' : ''}>{item}</span>
-                      {holder && <span className="ml-1 text-gray-600">({holder.species})</span>}
+                      <span className={holder ? 'line-through' : ''}>{zhItem(item)}</span>
+                      {holder && <span className="ml-1 text-gray-600">({zhPokemon(holder.species)})</span>}
                       {desc && <div className={`mt-0.5 ${holder ? 'text-gray-600' : 'text-gray-500'}`}>{desc}</div>}
                     </div>
                   )
@@ -289,7 +290,7 @@ function PokemonPrepareEditor({
         </div>
         <div className="flex-1">
           <div className="text-white font-bold text-lg">
-            {species.name}
+            {zhPokemon(species.name)}
             {pokemon.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
             {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
           </div>
@@ -327,8 +328,8 @@ function PokemonPrepareEditor({
                         style={{ imageRendering: evoSprite.pixelated ? 'pixelated' : 'auto' }}
                       />
                     )}
-                    <span className="text-white text-sm font-medium">{evo.evoName}</span>
-                    <span className="text-gray-500 text-xs ml-auto">BST {evo.evoBst}</span>
+                    <span className="text-white text-sm font-medium">{zhPokemon(evo.evoName)}</span>
+                    <span className="text-gray-500 text-xs ml-auto">种族值 {evo.evoBst}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-600 rounded-full h-2">
@@ -360,9 +361,9 @@ function PokemonPrepareEditor({
       <div>
         <label className="block text-xs text-gray-400 mb-1">Ability</label>
         <div className="bg-gray-700 rounded px-3 py-2">
-          <div className="text-white text-sm font-medium">{pokemon.ability}</div>
-          {abilityData?.shortDesc && (
-            <div className="text-gray-400 text-xs mt-0.5">{abilityData.shortDesc}</div>
+          <div className="text-white text-sm font-medium">{zhAbility(pokemon.ability)}</div>
+          {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && (
+            <div className="text-gray-400 text-xs mt-0.5">{zhAbilityDesc(pokemon.ability) || abilityData!.shortDesc}</div>
           )}
         </div>
       </div>
@@ -394,6 +395,7 @@ function PokemonPrepareEditor({
         options={ownedItems}
         onChange={(item) => onItemChange(slotIndex, item)}
         placeholder="No item (pick from inventory)"
+        formatLabel={zhItem}
       />
 
       {/* Moves with descriptions */}
@@ -415,7 +417,7 @@ function PokemonPrepareEditor({
                 />
                 {md && (
                   <div className="mt-0.5 px-2 text-xs text-gray-500">
-                    {md.shortDesc}
+                    {zhMoveDesc(move) || md.shortDesc}
                     <span className="ml-2 text-gray-600">
                       {md.category === 'Physical' ? '⚔ Physical' : md.category === 'Special' ? '✦ Special' : '◎ Status'}
                       {md.accuracy === true ? '' : ` · ${md.accuracy}% acc`}
@@ -439,14 +441,14 @@ function PokemonPrepareEditor({
               <label className="text-xs text-gray-400">Stats</label>
               <div className="flex items-center gap-2">
                 <span className={`text-xs font-medium ${evTotal >= 510 ? 'text-red-400' : 'text-gray-400'}`}>
-                  EVs: {evTotal} / 510
+                  努力值: {evTotal} / 510
                 </span>
                 {evDirty && (
                   <button
                     onClick={onEvSave}
                     className="text-xs px-2 py-0.5 rounded bg-green-600 hover:bg-green-500 text-white font-medium transition-colors"
                   >
-                    Save EVs
+                    保存
                   </button>
                 )}
               </div>
@@ -456,12 +458,12 @@ function PokemonPrepareEditor({
         <div className="bg-gray-700 rounded overflow-hidden">
           {/* Header row */}
           <div className="grid grid-cols-[3rem_1fr_2.5rem_2rem_5.5rem_3rem] gap-1 px-2 py-1 text-[10px] text-gray-500 border-b border-gray-600">
-            <span>Stat</span>
+            <span>能力</span>
             <span></span>
-            <span className="text-right">Base</span>
-            <span className="text-right">IV</span>
-            <span className="text-center">EV</span>
-            <span className="text-right">Total</span>
+            <span className="text-right">种族值</span>
+            <span className="text-right">个体值</span>
+            <span className="text-center">努力值</span>
+            <span className="text-right">实数值</span>
           </div>
           {STATS.map((stat) => {
             const ev = editedEvs[stat]

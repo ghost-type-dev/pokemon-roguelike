@@ -7,9 +7,11 @@ interface SearchSelectProps {
   onChange: (value: string) => void
   placeholder?: string
   disabled?: boolean
+  formatLabel?: (opt: string) => string
 }
 
-export function SearchSelect({ label, value, options, onChange, placeholder, disabled }: SearchSelectProps) {
+export function SearchSelect({ label, value, options, onChange, placeholder, disabled, formatLabel }: SearchSelectProps) {
+  const fmt = formatLabel ?? ((o: string) => o)
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [highlightIndex, setHighlightIndex] = useState(0)
@@ -17,7 +19,7 @@ export function SearchSelect({ label, value, options, onChange, placeholder, dis
   const listRef = useRef<HTMLDivElement>(null)
 
   const filtered = query
-    ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase())).slice(0, 50)
+    ? options.filter((o) => o.toLowerCase().includes(query.toLowerCase()) || fmt(o).toLowerCase().includes(query.toLowerCase())).slice(0, 50)
     : options.slice(0, 50)
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export function SearchSelect({ label, value, options, onChange, placeholder, dis
         }}
       >
         <span className={value ? 'text-white' : 'text-gray-500'}>
-          {value || placeholder || 'Select...'}
+          {value ? fmt(value) : (placeholder || 'Select...')}
         </span>
         {value && !disabled && (
           <button
@@ -109,7 +111,7 @@ export function SearchSelect({ label, value, options, onChange, placeholder, dis
                 }}
                 onMouseEnter={() => setHighlightIndex(i)}
               >
-                {opt}
+                {fmt(opt)}
               </div>
             ))}
             {filtered.length === 0 && (
