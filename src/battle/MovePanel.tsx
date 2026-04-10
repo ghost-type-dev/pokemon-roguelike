@@ -1,31 +1,16 @@
 import { useBattleStore } from './useBattleStore'
 import { battleManager } from '../engine/BattleManager'
-import { zhPokemon, zhMove } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhType, zhCategory, zhMoveDesc } from '../i18n/zh-helpers'
 import { useT } from '../i18n/strings'
+import { getMove } from '../teambuilder/dex-helpers'
 
-const TYPE_COLORS: Record<string, string> = {
-  Normal: 'bg-gray-500 hover:bg-gray-400',
-  Fire: 'bg-red-600 hover:bg-red-500',
-  Water: 'bg-blue-600 hover:bg-blue-500',
-  Electric: 'bg-yellow-500 hover:bg-yellow-400 text-black',
-  Grass: 'bg-green-600 hover:bg-green-500',
-  Ice: 'bg-cyan-400 hover:bg-cyan-300 text-black',
-  Fighting: 'bg-red-800 hover:bg-red-700',
-  Poison: 'bg-purple-600 hover:bg-purple-500',
-  Ground: 'bg-yellow-700 hover:bg-yellow-600',
-  Flying: 'bg-indigo-400 hover:bg-indigo-300',
-  Psychic: 'bg-pink-600 hover:bg-pink-500',
-  Bug: 'bg-lime-600 hover:bg-lime-500',
-  Rock: 'bg-yellow-800 hover:bg-yellow-700',
-  Ghost: 'bg-purple-800 hover:bg-purple-700',
-  Dragon: 'bg-indigo-700 hover:bg-indigo-600',
-  Dark: 'bg-gray-800 hover:bg-gray-700 border border-gray-600',
-  Steel: 'bg-gray-500 hover:bg-gray-400',
-  Fairy: 'bg-pink-400 hover:bg-pink-300 text-black',
-}
-
-function getMoveColor(type: string): string {
-  return TYPE_COLORS[type] || 'bg-gray-600 hover:bg-gray-500'
+const TYPE_TAG_COLORS: Record<string, string> = {
+  Normal: 'bg-gray-400', Fire: 'bg-red-500', Water: 'bg-blue-500',
+  Electric: 'bg-yellow-400 text-black', Grass: 'bg-green-500', Ice: 'bg-cyan-300 text-black',
+  Fighting: 'bg-red-700', Poison: 'bg-purple-500', Ground: 'bg-yellow-600',
+  Flying: 'bg-indigo-300', Psychic: 'bg-pink-500', Bug: 'bg-lime-500',
+  Rock: 'bg-yellow-700', Ghost: 'bg-purple-700', Dragon: 'bg-indigo-600',
+  Dark: 'bg-gray-700', Steel: 'bg-gray-400', Fairy: 'bg-pink-300',
 }
 
 export function MovePanel() {
@@ -74,23 +59,52 @@ function MoveSelectionPanel({ request }: { request: any }) {
       </div>
 
       {/* Moves */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-1.5">
         {active.moves.map((move: any, i: number) => {
           const disabled = move.disabled
           const pp = move.pp !== undefined ? `${move.pp}/${move.maxpp}` : ''
+          const dexMove = getMove(move.move)
+          const type = move.type || dexMove?.type || 'Normal'
+          const basePower = dexMove?.basePower ?? 0
+          const accuracy = dexMove?.accuracy
+          const category = dexMove?.category ?? ''
+          const desc = zhMoveDesc(move.move) || dexMove?.shortDesc || ''
           return (
             <button
               key={i}
               onClick={() => handleMove(i)}
               disabled={disabled}
-              className={`${disabled ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : getMoveColor(move.type || 'Normal')}
-                text-white font-medium py-3 px-4 rounded-lg text-left transition-colors`}
+              className={`w-full text-left rounded-lg px-3 py-2 transition-colors ${
+                disabled
+                  ? 'bg-gray-700/50 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-700 hover:bg-gray-600 text-white'
+              }`}
             >
-              <div className="font-bold text-sm">{zhMove(move.move)}</div>
-              <div className="text-xs opacity-80 flex justify-between mt-0.5">
-                <span>{move.type}</span>
-                {pp && <span>PP {pp}</span>}
+              <div className="flex items-center gap-2">
+                <span className={`${TYPE_TAG_COLORS[type] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0.5 rounded w-14 text-center flex-shrink-0`}>
+                  {zhType(type)}
+                </span>
+                <span className="font-bold text-sm flex-1 truncate">{zhMove(move.move)}</span>
+                <span className="text-xs text-gray-300 w-10 text-right flex-shrink-0">
+                  {basePower > 0 ? basePower : '—'}
+                </span>
+                <span className="text-xs text-gray-400 w-12 text-right flex-shrink-0">
+                  {accuracy === true || accuracy === undefined ? '—' : `${accuracy}%`}
+                </span>
+                <span className="text-xs text-gray-500 w-10 text-right flex-shrink-0">
+                  {category ? zhCategory(category) : ''}
+                </span>
+                {pp && (
+                  <span className="text-xs text-gray-500 w-14 text-right flex-shrink-0">
+                    PP {pp}
+                  </span>
+                )}
               </div>
+              {desc && (
+                <div className="text-[11px] text-gray-400 mt-1 pl-[4rem] leading-snug">
+                  {desc}
+                </div>
+              )}
             </button>
           )
         })}

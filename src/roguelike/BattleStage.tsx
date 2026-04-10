@@ -8,6 +8,7 @@ import { useBattleStore } from '../battle/useBattleStore'
 import { battleManager } from '../engine/BattleManager'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { generateAITeam, fillAIMoves, getMaxTeamSize } from './roguelike-helpers'
+import { useT } from '../i18n/strings'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
 function packPokemonSets(sets: PokemonSet[]): string {
@@ -27,6 +28,7 @@ function packPokemonSets(sets: PokemonSet[]): string {
 }
 
 export function BattleStage() {
+  const t = useT()
   const roster = useRoguelikeStore((s) => s.roster)
   const round = useRoguelikeStore((s) => s.round)
   const aiDifficulty = useRoguelikeStore((s) => s.aiDifficulty)
@@ -65,6 +67,12 @@ export function BattleStage() {
       const p2Packed = packPokemonSets(aiTeamWithMoves)
 
       battleManager.connect()
+      // Sync names to the battle store so BattleScene displays them correctly
+      // (translatePlayerLabel pattern-matches these to render localized labels)
+      useBattleStore.getState().setConfig({
+        p1Name: 'Player',
+        p2Name: `Round ${round} Boss`,
+      })
       await battleManager.startBattleWithTeams({
         formatId: 'gen9anythinggoes',
         p1AI: 'human',
@@ -97,7 +105,7 @@ export function BattleStage() {
   if (!battleStarted) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-400 animate-pulse">Generating opponent team...</div>
+        <div className="text-gray-400 animate-pulse">{t.generatingOpponent}</div>
       </div>
     )
   }
@@ -105,18 +113,18 @@ export function BattleStage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Round {round} Battle</h2>
+        <h2 className="text-xl font-bold text-white">{t.roundBattleFmt(round)}</h2>
         <div className="flex items-center gap-3 text-sm text-gray-400">
-          {currentTurn > 0 && <span>Turn {currentTurn}</span>}
+          {currentTurn > 0 && <span>{t.turnFmt(currentTurn)}</span>}
           {humanRequest && battleStatus === 'running' && (
             <span className="inline-flex items-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              Your turn
+              {t.yourTurnLabel}
             </span>
           )}
           {battleStatus === 'finished' && (
             <span className={winner === 'Player' ? 'text-green-400' : 'text-red-400'}>
-              {winner === 'Player' ? 'Victory!' : 'Defeated...'}
+              {winner === 'Player' ? t.victoryLabel : t.defeatedLabel}
             </span>
           )}
         </div>
@@ -134,7 +142,7 @@ export function BattleStage() {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-gray-300 mb-2">Battle Log</h3>
+        <h3 className="text-lg font-semibold text-gray-300 mb-2">{t.battleLogHeading}</h3>
         <BattleLog />
       </div>
     </div>

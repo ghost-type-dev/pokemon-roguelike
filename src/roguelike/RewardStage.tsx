@@ -4,7 +4,7 @@ import { useRoguelikeStore } from './useRoguelikeStore'
 import { getAllLearnableMoves, getMovePowerCap } from './roguelike-helpers'
 import { getGen, getSpecies, getMove, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import type { RewardOption } from './constants'
-import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc, zhType } from '../i18n/zh-helpers'
 import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
 
@@ -312,7 +312,7 @@ export function RewardStage() {
                       <div className="flex items-center gap-2">
                         {md && (
                           <span className={`${TYPE_COLORS[md.type] || 'bg-gray-500'} text-white text-[10px] font-bold px-1 py-0 rounded`}>
-                            {md.type}
+                            {zhType(md.type)}
                           </span>
                         )}
                         <span className="text-white text-sm">{zhMove(m)}</span>
@@ -480,7 +480,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
             <span className="text-white font-bold text-sm">{zhPokemon(species.name)}</span>
             {species.types.map((tp: string) => (
               <span key={tp} className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}>
-                {tp}
+                {zhType(tp)}
               </span>
             ))}
           </div>

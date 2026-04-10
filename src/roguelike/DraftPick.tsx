@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Sprites } from '@pkmn/img'
 import { getSpecies, getMove, getGen, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import { useRoguelikeStore } from './useRoguelikeStore'
-import { zhPokemon, zhMove, zhAbility, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhAbility, zhAbilityDesc, zhMoveDesc, zhType } from '../i18n/zh-helpers'
 import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
@@ -131,7 +131,7 @@ function DraftCard({ t, pokemon, picked, onPick }: {
                 key={tp}
                 className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}
               >
-                {tp}
+                {zhType(tp)}
               </span>
             ))}
           </div>
@@ -169,7 +169,7 @@ function DraftCard({ t, pokemon, picked, onPick }: {
             <div key={md!.name} className="text-[10px]">
               <div className="flex items-center gap-1.5">
                 <span className={`${MOVE_TYPE_COLORS[md!.type] || 'bg-gray-500'} text-[9px] font-bold px-1 rounded w-12 text-center truncate`}>
-                  {md!.type}
+                  {zhType(md!.type)}
                 </span>
                 <span className="text-white truncate flex-1">{zhMove(md!.name)}</span>
                 {md!.basePower > 0 && (

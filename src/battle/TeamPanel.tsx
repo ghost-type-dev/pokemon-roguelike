@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Sprites } from '@pkmn/img'
 import { useBattleStore } from './useBattleStore'
 import { getGen } from '../teambuilder/dex-helpers'
-import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc, zhType, zhCategory } from '../i18n/zh-helpers'
 import { useT } from '../i18n/strings'
 
 
@@ -25,6 +25,15 @@ const TYPE_COLORS: Record<string, string> = {
   Dark: 'bg-gray-700',
   Steel: 'bg-gray-400',
   Fairy: 'bg-pink-300 text-gray-900',
+}
+
+const TYPE_TAG_COLORS: Record<string, string> = {
+  Normal: 'bg-gray-400', Fire: 'bg-red-500', Water: 'bg-blue-500',
+  Electric: 'bg-yellow-400 text-black', Grass: 'bg-green-500', Ice: 'bg-cyan-300 text-black',
+  Fighting: 'bg-red-700', Poison: 'bg-purple-500', Ground: 'bg-yellow-600',
+  Flying: 'bg-indigo-300', Psychic: 'bg-pink-500', Bug: 'bg-lime-500',
+  Rock: 'bg-yellow-700', Ghost: 'bg-purple-700', Dragon: 'bg-indigo-600',
+  Dark: 'bg-gray-700', Steel: 'bg-gray-400', Fairy: 'bg-pink-300',
 }
 
 const gen = getGen(9)
@@ -98,12 +107,12 @@ export function TeamPanel() {
                         <span className="text-white text-sm font-medium truncate">{zhPokemon(name)}</span>
                         {gender === 'M' && <span className="text-blue-400 text-sm">♂</span>}
                         {gender === 'F' && <span className="text-pink-400 text-sm">♀</span>}
-                        {lookupTypes(species).map((t: string) => (
+                        {lookupTypes(species).map((tp: string) => (
                           <span
-                            key={t}
-                            className={`${TYPE_COLORS[t] || 'bg-gray-500'} text-white text-[10px] font-bold px-1 rounded leading-tight`}
+                            key={tp}
+                            className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-[10px] font-bold px-1 rounded leading-tight`}
                           >
-                            {t.slice(0, 3).toUpperCase()}
+                            {zhType(tp)}
                           </span>
                         ))}
                       </div>
@@ -132,35 +141,45 @@ export function TeamPanel() {
                 <div className="bg-gray-750 rounded px-3 py-2 mt-1 ml-2 mr-1 space-y-2 text-xs">
                   {/* Item */}
                   <div>
-                    <div>
-                      <span className="text-gray-500">{t.itemColon} </span>
-                      <span className="text-amber-300">
-                        {poke.item ? zhItem(poke.item) : t.noneItem}
-                      </span>
-                    </div>
-                    {poke.item && (() => {
-                      const itemData = lookupItem(poke.item)
-                      const itemDesc = zhItemDesc(poke.item) || itemData?.shortDesc
-                      return itemDesc ? (
-                        <div className="text-gray-500 ml-2 mt-0.5 italic">{itemDesc}</div>
-                      ) : null
+                    {(() => {
+                      const itemData = poke.item ? lookupItem(poke.item) : null
+                      const itemName = itemData?.name || poke.item
+                      const itemDesc = itemName ? (zhItemDesc(itemName) || itemData?.shortDesc) : null
+                      return (
+                        <>
+                          <div>
+                            <span className="text-gray-500">{t.itemColon} </span>
+                            <span className="text-amber-300">
+                              {itemName ? zhItem(itemName) : t.noneItem}
+                            </span>
+                          </div>
+                          {itemDesc && (
+                            <div className="text-gray-500 ml-2 mt-0.5 italic">{itemDesc}</div>
+                          )}
+                        </>
+                      )
                     })()}
                   </div>
 
                   {/* Ability */}
                   <div>
-                    <div>
-                      <span className="text-gray-500">{t.abilityColon} </span>
-                      <span className="text-indigo-300">
-                        {zhAbility(poke.ability)}
-                      </span>
-                    </div>
                     {(() => {
                       const abilityData = lookupAbility(poke.ability)
-                      const abilityDesc = zhAbilityDesc(poke.ability) || abilityData?.shortDesc
-                      return abilityDesc ? (
-                        <div className="text-gray-500 ml-2 mt-0.5 italic">{abilityDesc}</div>
-                      ) : null
+                      const abilityName = abilityData?.name || poke.ability
+                      const abilityDesc = zhAbilityDesc(abilityName) || abilityData?.shortDesc
+                      return (
+                        <>
+                          <div>
+                            <span className="text-gray-500">{t.abilityColon} </span>
+                            <span className="text-indigo-300">
+                              {zhAbility(abilityName)}
+                            </span>
+                          </div>
+                          {abilityDesc && (
+                            <div className="text-gray-500 ml-2 mt-0.5 italic">{abilityDesc}</div>
+                          )}
+                        </>
+                      )
                     })()}
                   </div>
 
@@ -180,20 +199,31 @@ export function TeamPanel() {
                     <div className="space-y-1 mt-1">
                       {poke.moves.map((move: string, j: number) => {
                         const moveData = lookupMove(move)
+                        const moveName = moveData?.name || move
+                        const type = moveData?.type || 'Normal'
+                        const basePower = moveData?.basePower ?? 0
+                        const accuracy = moveData?.accuracy
+                        const category = moveData?.category ?? ''
+                        const desc = zhMoveDesc(moveName) || moveData?.shortDesc || ''
                         return (
-                          <div key={j} className="bg-gray-700 rounded px-2 py-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-200">{zhMove(moveData?.name || move)}</span>
-                              {moveData && (
-                                <span className="text-gray-500">
-                                  {moveData.category !== 'Status' ? `${moveData.basePower} ${t.bpSuffix}` : t.catStatus}
-                                  {' · '}
-                                  {moveData.type}
-                                </span>
-                              )}
+                          <div key={j} className="bg-gray-700 rounded px-2 py-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className={`${TYPE_TAG_COLORS[type] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0.5 rounded w-12 text-center flex-shrink-0`}>
+                                {zhType(type)}
+                              </span>
+                              <span className="text-gray-200 font-medium flex-1 truncate">{zhMove(moveName)}</span>
+                              <span className="text-gray-400 w-8 text-right flex-shrink-0">
+                                {basePower > 0 ? basePower : '—'}
+                              </span>
+                              <span className="text-gray-500 w-10 text-right flex-shrink-0">
+                                {accuracy === true || accuracy === undefined ? '—' : `${accuracy}%`}
+                              </span>
+                              <span className="text-gray-500 w-8 text-right flex-shrink-0">
+                                {category ? zhCategory(category) : ''}
+                              </span>
                             </div>
-                            {(zhMoveDesc(moveData?.name || move) || moveData?.shortDesc) && (
-                              <div className="text-gray-500 mt-0.5 italic">{zhMoveDesc(moveData?.name || move) || moveData!.shortDesc}</div>
+                            {desc && (
+                              <div className="text-gray-500 mt-0.5 italic pl-[3.5rem] leading-snug">{desc}</div>
                             )}
                           </div>
                         )

@@ -4,6 +4,16 @@ import { PokemonSprite } from './PokemonSprite'
 import { HPBar } from './HPBar'
 import { formatLine } from './formatLine'
 import { useLanguage } from '../i18n/useLanguage'
+import { useT, type Strings } from '../i18n/strings'
+import { zhPokemon } from '../i18n/zh-helpers'
+
+/** Translate the stored p1/p2 player labels for display. */
+function translatePlayerLabel(name: string, t: Strings): string {
+  if (name === 'Player') return t.playerName
+  const match = name.match(/^Round (\d+) Boss$/)
+  if (match) return t.bossNameFmt(parseInt(match[1]))
+  return name
+}
 
 interface PokemonState {
   name: string
@@ -282,6 +292,7 @@ function TurnNarration({ events }: { events: Array<{ data: string }> }) {
 }
 
 export function BattleScene() {
+  const t = useT()
   const visibleEvents = useBattleStore((s) => s.visibleEvents)
   const p1Name = useBattleStore((s) => s.p1Name)
   const p2Name = useBattleStore((s) => s.p2Name)
@@ -297,6 +308,9 @@ export function BattleScene() {
     )
   }
 
+  const p1Label = translatePlayerLabel(p1Name, t)
+  const p2Label = translatePlayerLabel(p2Name, t)
+
   return (
     <div className="bg-gradient-to-b from-sky-900 via-sky-800 to-green-900 rounded-lg h-72 relative overflow-hidden">
       {/* Grass/ground area */}
@@ -309,7 +323,7 @@ export function BattleScene() {
         </div>
         {p2 && (
           <HPBar
-            name={p2.name}
+            name={zhPokemon(p2.name)}
             current={p2.hp}
             max={p2.maxHp}
             level={p2.level}
@@ -323,7 +337,7 @@ export function BattleScene() {
       </div>
 
       {/* Player 2 label */}
-      <div className="absolute top-2 right-4 text-xs text-gray-400">{p2Name}</div>
+      <div className="absolute top-2 right-4 text-xs text-gray-400">{p2Label}</div>
 
       {/* Player 1 (us) - bottom left */}
       <div className="absolute bottom-24 left-8">
@@ -332,7 +346,7 @@ export function BattleScene() {
         </div>
         {p1 && (
           <HPBar
-            name={p1.name}
+            name={zhPokemon(p1.name)}
             current={p1.hp}
             max={p1.maxHp}
             level={p1.level}
@@ -346,7 +360,7 @@ export function BattleScene() {
       </div>
 
       {/* Player 1 label */}
-      <div className="absolute bottom-2 left-4 text-xs text-gray-400">{p1Name}</div>
+      <div className="absolute bottom-2 left-4 text-xs text-gray-400">{p1Label}</div>
 
       {/* Turn narration overlay */}
       <TurnNarration events={visibleEvents} />

@@ -6,7 +6,7 @@ import { SearchSelect } from '../teambuilder/SearchSelect'
 import { MoveSelect } from './MoveSelect'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { getMaxTeamSize, getEvolutionProgress } from './roguelike-helpers'
-import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc, zhType } from '../i18n/zh-helpers'
 import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
 
@@ -304,7 +304,7 @@ function PokemonPrepareEditor({
                 key={tp}
                 className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-xs font-bold px-2 py-0.5 rounded`}
               >
-                {tp}
+                {zhType(tp)}
               </span>
             ))}
           </div>

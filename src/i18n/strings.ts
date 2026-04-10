@@ -139,6 +139,17 @@ const en = {
   forceSwitchPrompt: 'Choose a Pokemon to send out!',
   switchPrompt: 'Switch to which Pokemon?',
 
+  // Battle stage header
+  generatingOpponent: 'Generating opponent team...',
+  roundBattleFmt: (round: number) => `Round ${round} Battle`,
+  turnFmt: (turn: number) => `Turn ${turn}`,
+  yourTurnLabel: 'Your turn',
+  victoryLabel: 'Victory!',
+  defeatedLabel: 'Defeated...',
+  battleLogHeading: 'Battle Log',
+  playerName: 'Player',
+  bossNameFmt: (round: number) => `Round ${round} Boss`,
+
   // Team panel
   itemColon: 'Item:',
   abilityColon: 'Ability:',
@@ -301,6 +312,17 @@ const zh: typeof en = {
   hpPctFmt: (n: number) => `HP ${n}%`,
   forceSwitchPrompt: '请派出下一只宝可梦！',
   switchPrompt: '要切换到哪只宝可梦？',
+
+  // Battle stage header
+  generatingOpponent: '正在生成对手队伍……',
+  roundBattleFmt: (round: number) => `第 ${round} 轮战斗`,
+  turnFmt: (turn: number) => `第 ${turn} 回合`,
+  yourTurnLabel: '你的回合',
+  victoryLabel: '胜利！',
+  defeatedLabel: '败北……',
+  battleLogHeading: '战斗日志',
+  playerName: '玩家',
+  bossNameFmt: (round: number) => `第 ${round} 轮 Boss`,
 
   // Team panel
   itemColon: '道具：',
