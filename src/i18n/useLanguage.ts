@@ -11,7 +11,7 @@ function loadInitialLanguage(): Language {
   } catch {
     // ignore
   }
-  return 'zh'
+  return 'en'
 }
 
 interface LanguageState {
