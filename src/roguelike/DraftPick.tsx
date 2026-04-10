@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { Sprites } from '@pkmn/img'
 import { getSpecies, getMove, getGen, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import { useRoguelikeStore } from './useRoguelikeStore'
-import { STAT_LABELS } from './constants'
 import { zhPokemon, zhMove, zhAbility, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
 import type { PokemonSet } from '../teambuilder/useTeamBuilder'
 
@@ -28,6 +28,7 @@ const MOVE_TYPE_COLORS: Record<string, string> = {
 const STATS: StatID[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe']
 
 export function DraftPick() {
+  const t = useT()
   const draftChoices = useRoguelikeStore((s) => s.draftChoices)
   const draftPicked = useRoguelikeStore((s) => s.draftPicked)
   const pickDraft = useRoguelikeStore((s) => s.pickDraft)
@@ -37,23 +38,24 @@ export function DraftPick() {
   if (draftChoices.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-gray-400 animate-pulse">Generating draft candidates...</div>
+        <div className="text-gray-400 animate-pulse">{t.generatingCandidates}</div>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-white">Draft Your Team</h2>
+      <h2 className="text-xl font-bold text-white">{t.draftTitle}</h2>
       <p className="text-gray-400 text-sm">
-        Pick {remaining} more Pokemon to start your run.
-        <span className="text-gray-600 ml-1">（种族值 &lt; 330）</span>
+        {t.draftPickRemaining(remaining)}
+        <span className="text-gray-600 ml-1">{t.draftBstHint}</span>
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {draftChoices.map((poke) => (
           <DraftCard
             key={poke.species}
+            t={t}
             pokemon={poke}
             picked={draftPicked.includes(poke.species)}
             onPick={() => pickDraft(poke.species)}
@@ -64,7 +66,8 @@ export function DraftPick() {
   )
 }
 
-function DraftCard({ pokemon, picked, onPick }: {
+function DraftCard({ t, pokemon, picked, onPick }: {
+  t: Strings
   pokemon: PokemonSet
   picked: boolean
   onPick: () => void
@@ -120,21 +123,21 @@ function DraftCard({ pokemon, picked, onPick }: {
               {pokemon.gender === 'M' && <span className="text-blue-400 ml-1">♂</span>}
               {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
             </span>
-            {picked && <span className="text-green-400 text-xs font-bold">Picked!</span>}
+            {picked && <span className="text-green-400 text-xs font-bold">{t.draftPicked}</span>}
           </div>
           <div className="flex gap-1 mt-1">
-            {species.types.map((t: string) => (
+            {species.types.map((tp: string) => (
               <span
-                key={t}
-                className={`${TYPE_COLORS[t] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}
+                key={tp}
+                className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}
               >
-                {t}
+                {tp}
               </span>
             ))}
           </div>
           {/* Ability */}
           <div className="mt-1">
-            <span className="text-gray-400 text-[10px]">Ability: </span>
+            <span className="text-gray-400 text-[10px]">{t.abilityLabel} </span>
             <span className="text-white text-[10px] font-medium">{zhAbility(pokemon.ability)}</span>
             {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && (
               <div className="text-gray-500 text-[10px]">{zhAbilityDesc(pokemon.ability) || abilityData!.shortDesc}</div>
@@ -142,17 +145,17 @@ function DraftCard({ pokemon, picked, onPick }: {
           </div>
           {/* Nature */}
           <div className="text-[10px]">
-            <span className="text-gray-400">Nature: </span>
-            <span className="text-white font-medium">{pokemon.nature}</span>
+            <span className="text-gray-400">{t.natureLabel} </span>
+            <span className="text-white font-medium">{t.nature[pokemon.nature] ?? pokemon.nature}</span>
             {natureData && natureData.plus && natureData.minus && (
               <span className="ml-1">
-                <span className="text-green-400">+{STAT_LABELS[natureData.plus]}</span>
+                <span className="text-green-400">+{t.statShort[natureData.plus]}</span>
                 {' / '}
-                <span className="text-red-400">-{STAT_LABELS[natureData.minus]}</span>
+                <span className="text-red-400">-{t.statShort[natureData.minus]}</span>
               </span>
             )}
             {natureData && !natureData.plus && (
-              <span className="text-gray-500 ml-1">Neutral</span>
+              <span className="text-gray-500 ml-1">{t.neutralNature}</span>
             )}
           </div>
         </div>
@@ -160,7 +163,7 @@ function DraftCard({ pokemon, picked, onPick }: {
 
       {/* Moves */}
       <div className="mb-3">
-        <div className="text-[10px] text-gray-500 mb-1">Moves</div>
+        <div className="text-[10px] text-gray-500 mb-1">{t.movesLabel}</div>
         <div className="space-y-1">
           {moveDetails.length > 0 ? moveDetails.map((md) => (
             <div key={md!.name} className="text-[10px]">
@@ -176,7 +179,7 @@ function DraftCard({ pokemon, picked, onPick }: {
                   {md!.accuracy === true ? '—' : `${md!.accuracy}%`}
                 </span>
                 <span className="text-gray-600 flex-shrink-0 w-8 text-right">
-                  {md!.category === 'Physical' ? 'Phys' : md!.category === 'Special' ? 'Spec' : 'Stat'}
+                  {md!.category === 'Physical' ? t.catPhys : md!.category === 'Special' ? t.catSpec : t.catStat}
                 </span>
               </div>
               {(zhMoveDesc(md!.name) || md!.shortDesc) && (
@@ -184,14 +187,14 @@ function DraftCard({ pokemon, picked, onPick }: {
               )}
             </div>
           )) : (
-            <div className="text-gray-600 text-[10px] animate-pulse">Loading moves...</div>
+            <div className="text-gray-600 text-[10px] animate-pulse">{t.loadingMoves}</div>
           )}
         </div>
       </div>
 
       {/* Stats */}
       <div>
-        <div className="text-[10px] text-gray-500 mb-0.5">能力值 <span className="text-gray-600">（种族值：{bst}）</span></div>
+        <div className="text-[10px] text-gray-500 mb-0.5">{t.baseStatsLine(bst)}</div>
         {STATS.map((stat) => {
           const total = calcStat(stat, bs[stat], pokemon.ivs[stat], pokemon.evs[stat], pokemon.level, natureData || undefined)
           const isPlus = natureData?.plus === stat
@@ -199,7 +202,7 @@ function DraftCard({ pokemon, picked, onPick }: {
           return (
             <div key={stat} className="flex items-center gap-1 text-[10px]">
               <span className={`w-7 font-medium ${isPlus ? 'text-green-400' : isMinus ? 'text-red-400' : 'text-gray-400'}`}>
-                {STAT_LABELS[stat]}{isPlus && '+'}{isMinus && '-'}
+                {t.statShort[stat]}{isPlus && '+'}{isMinus && '-'}
               </span>
               <div className="flex-1 bg-gray-700 rounded-full h-1.5">
                 <div

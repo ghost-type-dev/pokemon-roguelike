@@ -4,74 +4,62 @@ import { useRoguelikeStore } from './useRoguelikeStore'
 import { getAllLearnableMoves, getMovePowerCap } from './roguelike-helpers'
 import { getGen, getSpecies, getMove, allNatures, calcStat } from '../teambuilder/dex-helpers'
 import type { RewardOption } from './constants'
-import { STAT_LABELS } from './constants'
 import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
 
-const ZH_STAT_FULL: Record<StatID, string> = {
-  hp: 'HP', atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度',
-}
-
-const ZH_NATURE: Record<string, string> = {
-  Hardy: '勤奋', Lonely: '孤独', Brave: '勇敢', Adamant: '固执', Naughty: '顽皮',
-  Bold: '大胆', Docile: '坦率', Relaxed: '悠闲', Impish: '淘气', Lax: '乐天',
-  Timid: '胆小', Hasty: '急躁', Serious: '认真', Jolly: '爽朗', Naive: '天真',
-  Modest: '内敛', Mild: '温和', Quiet: '冷静', Bashful: '害羞', Rash: '马虎',
-  Calm: '温顺', Gentle: '温柔', Sassy: '自大', Careful: '慎重', Quirky: '浮躁',
-}
-
-function getRewardLabel(reward: RewardOption): string {
+function getRewardLabel(reward: RewardOption, t: Strings): string {
   switch (reward.type) {
     case 'item':
-      return reward.itemName ? `道具：${zhItem(reward.itemName)}` : reward.label
+      return reward.itemName ? t.rewardItemLabel(zhItem(reward.itemName)) : reward.label
     case 'tm':
-      return '学习新技能'
+      return t.rewardTmLabel
     case 'ability': {
       const m = reward.label.match(/^Ability: (.+)$/)
-      return m ? `特性：${zhAbility(m[1])}` : reward.label
+      return m ? t.rewardAbilityLabel(zhAbility(m[1])) : reward.label
     }
     case 'ev-boost':
-      return reward.stat ? `+80 ${ZH_STAT_FULL[reward.stat]}努力值` : reward.label
+      return reward.stat ? t.rewardEvLabel(t.statFull[reward.stat]) : reward.label
     case 'nature':
-      return reward.natureName ? `性格：${ZH_NATURE[reward.natureName] ?? reward.natureName}` : reward.label
+      return reward.natureName ? t.rewardNatureLabel(t.nature[reward.natureName] ?? reward.natureName) : reward.label
     case 'new-pokemon':
-      return reward.pokemonSpecies ? `招募：${zhPokemon(reward.pokemonSpecies)}` : reward.label
+      return reward.pokemonSpecies ? t.rewardRecruitLabel(zhPokemon(reward.pokemonSpecies)) : reward.label
     default:
       return reward.label
   }
 }
 
-function getRewardDesc(reward: RewardOption): string {
+function getRewardDesc(reward: RewardOption, t: Strings): string {
   switch (reward.type) {
     case 'item':
-      return reward.itemName ? `将 ${zhItem(reward.itemName)} 加入道具栏。` : reward.description
+      return reward.itemName ? t.rewardItemDesc(zhItem(reward.itemName)) : reward.description
     case 'tm':
-      return '选择一只精灵并教它一个新技能。'
+      return t.rewardTmDesc
     case 'ability': {
       const m = reward.label.match(/^Ability: (.+)$/)
-      const zhAb = m ? zhAbility(m[1]) : ''
+      const ab = m ? zhAbility(m[1]) : ''
       return reward.targetSpecies
-        ? `将 ${zhPokemon(reward.targetSpecies)} 的特性改为${zhAb}。`
+        ? t.rewardAbilityDesc(zhPokemon(reward.targetSpecies), ab)
         : reward.description
     }
     case 'ev-boost':
       return reward.stat && reward.targetSpecies
-        ? `为 ${zhPokemon(reward.targetSpecies)} 的${ZH_STAT_FULL[reward.stat]}增加 80 努力值。`
+        ? t.rewardEvDesc(zhPokemon(reward.targetSpecies), t.statFull[reward.stat])
         : reward.description
     case 'nature': {
       if (!reward.targetSpecies || !reward.natureName) return reward.description
-      const zhNatureName = ZH_NATURE[reward.natureName] ?? reward.natureName
+      const natureName = t.nature[reward.natureName] ?? reward.natureName
       const nd = allNatures().find(n => n.name === reward.natureName)
       const effect = nd?.plus && nd?.minus
-        ? `（+${ZH_STAT_FULL[nd.plus]}，-${ZH_STAT_FULL[nd.minus]}）`
-        : '（中性）'
-      return `将 ${zhPokemon(reward.targetSpecies)} 的性格改为${zhNatureName}${effect}。`
+        ? t.rewardNaturePlusMinus(t.statFull[nd.plus], t.statFull[nd.minus])
+        : t.rewardNatureNeutral
+      return t.rewardNatureDesc(zhPokemon(reward.targetSpecies), natureName, effect)
     }
     case 'new-pokemon':
       if (!reward.pokemonSpecies) return reward.description
       return reward.description.includes('Replace')
-        ? `用击败队伍中的 ${zhPokemon(reward.pokemonSpecies)} 替换一名队员。`
-        : `将击败队伍中的 ${zhPokemon(reward.pokemonSpecies)} 加入队伍。`
+        ? t.rewardRecruitReplaceDesc(zhPokemon(reward.pokemonSpecies))
+        : t.rewardRecruitJoinDesc(zhPokemon(reward.pokemonSpecies))
     default:
       return reward.description
   }
@@ -102,6 +90,7 @@ function extractAbilityName(reward: RewardOption): string | null {
 }
 
 export function RewardStage() {
+  const t = useT()
   const rewardOptions = useRoguelikeStore((s) => s.rewardOptions)
   const roster = useRoguelikeStore((s) => s.roster)
   const applyReward = useRoguelikeStore((s) => s.applyReward)
@@ -194,14 +183,14 @@ export function RewardStage() {
     <div className="space-y-4">
       <div className="text-center">
         <h2 className="text-xl font-bold text-green-400">
-          {roundsWon === 0 ? 'Team Drafted!' : `Victory! Round ${roundsWon} cleared!`}
+          {roundsWon === 0 ? t.teamDrafted : t.victoryRoundCleared(roundsWon)}
         </h2>
-        <p className="text-gray-400 text-sm mt-1">Choose a reward.</p>
+        <p className="text-gray-400 text-sm mt-1">{t.chooseReward}</p>
         <button
           onClick={() => setShowTeam(t => !t)}
           className="text-purple-400 hover:text-purple-300 text-xs mt-1"
         >
-          {showTeam ? 'Hide Team' : 'Review Team'}
+          {showTeam ? t.hideTeam : t.reviewTeam}
         </button>
       </div>
 
@@ -228,10 +217,10 @@ export function RewardStage() {
                 <div className="flex items-center gap-2 mb-1">
                   <RewardIcon type={reward.type} />
                   <span className="text-white font-bold text-sm">
-                    {getRewardLabel(reward)}
+                    {getRewardLabel(reward, t)}
                   </span>
                 </div>
-                <p className="text-gray-400 text-xs">{getRewardDesc(reward)}</p>
+                <p className="text-gray-400 text-xs">{getRewardDesc(reward, t)}</p>
                 {extraDesc && (
                   <p className="text-gray-500 text-xs mt-1 italic">{extraDesc}</p>
                 )}
@@ -247,7 +236,7 @@ export function RewardStage() {
                     })()}
                     <span className="text-gray-500 text-xs">
                       {zhPokemon(reward.targetSpecies)}
-                      {reward.type === 'ev-boost' && reward.stat && ` · ${ZH_STAT_FULL[reward.stat]}`}
+                      {reward.type === 'ev-boost' && reward.stat && ` · ${t.statFull[reward.stat]}`}
                     </span>
                   </div>
                 )}
@@ -260,7 +249,7 @@ export function RewardStage() {
       {/* New move: pick Pokemon first, then pick move */}
       {selectedReward?.type === 'tm' && !tmTargetSpecies && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
-          <h3 className="text-white font-bold">Pick a Pokemon to learn a new move</h3>
+          <h3 className="text-white font-bold">{t.pickPokemonForMove}</h3>
           <div className="space-y-1">
             {roster.filter(p => p.species).map((p) => {
               const sprite = Sprites.getPokemon(p.species, { gen: 'gen5' })
@@ -290,23 +279,23 @@ export function RewardStage() {
       )}
       {selectedReward?.type === 'tm' && tmTargetSpecies && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
-          <h3 className="text-white font-bold">New Move for {zhPokemon(tmTargetSpecies)}</h3>
+          <h3 className="text-white font-bold">{t.newMoveForFmt(zhPokemon(tmTargetSpecies))}</h3>
 
           {loadingTMs ? (
-            <div className="text-gray-400 animate-pulse">Loading moves...</div>
+            <div className="text-gray-400 animate-pulse">{t.loadingMoves}</div>
           ) : tmMoveChoices.length === 0 ? (
             <div className="text-gray-500">
-              No unlearned moves available for {tmTargetSpecies}. Reward skipped.
+              {t.noUnlearnedMovesFmt(zhPokemon(tmTargetSpecies))}
               <button
                 onClick={handleConfirm}
                 className="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 rounded transition-colors"
               >
-                Continue
+                {t.continueBtn}
               </button>
             </div>
           ) : (
             <>
-              <label className="block text-xs text-gray-400">Pick a move to learn</label>
+              <label className="block text-xs text-gray-400">{t.pickMoveLabel}</label>
               <div className="space-y-1">
                 {tmMoveChoices.map((m) => {
                   const md = getMove(m)
@@ -329,7 +318,7 @@ export function RewardStage() {
                         <span className="text-white text-sm">{zhMove(m)}</span>
                         {md && (
                           <span className="text-gray-500 text-xs ml-auto">
-                            {md.category === 'Status' ? 'Status' : `${md.basePower > 0 ? md.basePower + 'bp' : '—'} ${md.category}`}
+                            {md.category === 'Status' ? t.catStatus : `${md.basePower > 0 ? md.basePower + 'bp' : '—'} ${md.category === 'Physical' ? t.catPhysical : t.catSpecial}`}
                           </span>
                         )}
                       </div>
@@ -345,7 +334,7 @@ export function RewardStage() {
                 disabled={!tmMove}
                 className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded transition-colors disabled:opacity-50"
               >
-                Learn Move
+                {t.learnMoveBtn}
               </button>
             </>
           )}
@@ -356,9 +345,9 @@ export function RewardStage() {
       {selectedReward && selectedReward.type !== 'tm' && (
         <div className="bg-gray-800 rounded-lg p-4 max-w-lg mx-auto space-y-4">
           <h3 className="text-white font-bold">
-            {getRewardLabel(selectedReward)}
+            {getRewardLabel(selectedReward, t)}
           </h3>
-          <p className="text-gray-400 text-sm">{getRewardDesc(selectedReward)}</p>
+          <p className="text-gray-400 text-sm">{getRewardDesc(selectedReward, t)}</p>
 
           {/* Show item description */}
           {selectedReward.type === 'item' && selectedReward.itemName && (
@@ -390,7 +379,7 @@ export function RewardStage() {
           {/* Pick who to replace when roster is full */}
           {selectedReward.type === 'new-pokemon' && roster.length >= 6 && (
             <div className="space-y-2">
-              <p className="text-yellow-400 text-sm font-medium">Team is full — choose a Pokemon to replace:</p>
+              <p className="text-yellow-400 text-sm font-medium">{t.teamFullReplaceHint}</p>
               <div className="space-y-1">
                 {roster.map((p, i) => {
                   if (!p.species) return null
@@ -413,7 +402,7 @@ export function RewardStage() {
                           style={{ imageRendering: sprite.pixelated ? 'pixelated' : 'auto' }} />
                       )}
                       <span className="text-white text-sm font-medium">{zhPokemon(p.species)}</span>
-                      <span className="text-gray-500 text-xs">种族值 {bst}</span>
+                      <span className="text-gray-500 text-xs">{t.bstShort(bst)}</span>
                       <span className="text-gray-600 text-xs ml-auto">
                         {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ')}
                       </span>
@@ -429,14 +418,14 @@ export function RewardStage() {
               onClick={() => { setSelectedReward(null); setReplaceIndex(null) }}
               className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 rounded transition-colors"
             >
-              Back
+              {t.backBtn}
             </button>
             <button
               onClick={handleConfirm}
               disabled={selectedReward.type === 'new-pokemon' && roster.length >= 6 && replaceIndex == null}
               className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {selectedReward.type === 'new-pokemon' && roster.length >= 6 ? 'Replace & Recruit' : 'Claim Reward'}
+              {selectedReward.type === 'new-pokemon' && roster.length >= 6 ? t.replaceAndRecruit : t.claimReward}
             </button>
           </div>
         </div>
@@ -467,6 +456,7 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
+  const t = useT()
   const species = getSpecies(pokemon.species)
   if (!species) return null
 
@@ -488,9 +478,9 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-white font-bold text-sm">{zhPokemon(species.name)}</span>
-            {species.types.map((t: string) => (
-              <span key={t} className={`${TYPE_COLORS[t] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}>
-                {t}
+            {species.types.map((tp: string) => (
+              <span key={tp} className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-[10px] font-bold px-1.5 py-0 rounded`}>
+                {tp}
               </span>
             ))}
           </div>
@@ -499,9 +489,9 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
             {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && <span className="text-gray-600"> — {zhAbilityDesc(pokemon.ability) || abilityData!.shortDesc}</span>}
           </div>
           <div className="text-gray-500 text-xs">
-            {pokemon.nature}
+            {t.nature[pokemon.nature] ?? pokemon.nature}
             {natureData?.plus && natureData?.minus && (
-              <span> (<span className="text-green-400">+{STAT_LABELS[natureData.plus]}</span> / <span className="text-red-400">-{STAT_LABELS[natureData.minus]}</span>)</span>
+              <span> (<span className="text-green-400">+{t.statShort[natureData.plus]}</span> / <span className="text-red-400">-{t.statShort[natureData.minus]}</span>)</span>
             )}
             {pokemon.item && <span> · {zhItem(pokemon.item)}</span>}
           </div>
@@ -520,7 +510,7 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
             </span>
           )
         })}
-        {pokemon.moves.every(m => !m) && <span className="text-gray-600 text-xs">No moves</span>}
+        {pokemon.moves.every(m => !m) && <span className="text-gray-600 text-xs">{t.noMoves}</span>}
       </div>
 
       {/* Stats row */}
@@ -532,11 +522,11 @@ function TeamReviewCard({ pokemon }: { pokemon: PokemonSet }) {
           return (
             <div key={stat} className="text-center">
               <div className={`font-bold ${isPlus ? 'text-green-400' : isMinus ? 'text-red-400' : 'text-gray-500'}`}>
-                {STAT_LABELS[stat]}
+                {t.statShort[stat]}
               </div>
               <div className="text-white font-bold">{total}</div>
               {pokemon.evs[stat] > 0 && (
-                <div className="text-green-500">{pokemon.evs[stat]}努</div>
+                <div className="text-green-500">{pokemon.evs[stat]}{t.evShort}</div>
               )}
             </div>
           )

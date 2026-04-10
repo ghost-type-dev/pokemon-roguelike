@@ -6,8 +6,8 @@ import { SearchSelect } from '../teambuilder/SearchSelect'
 import { MoveSelect } from './MoveSelect'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { getMaxTeamSize, getEvolutionProgress } from './roguelike-helpers'
-import { STAT_LABELS } from './constants'
 import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
+import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -20,6 +20,7 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 export function PrepareStage() {
+  const t = useT()
   const roster = useRoguelikeStore((s) => s.roster)
   const inventory = useRoguelikeStore((s) => s.inventory)
   const updateRosterMove = useRoguelikeStore((s) => s.updateRosterMove)
@@ -78,7 +79,7 @@ export function PrepareStage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Prepare for Round {round}</h2>
+        <h2 className="text-xl font-bold text-white">{t.prepareTitle(round)}</h2>
         <button
           onClick={handleStartBattle}
           disabled={!canStart}
@@ -88,7 +89,7 @@ export function PrepareStage() {
               : 'bg-gray-700 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Ready for Battle
+          {t.readyForBattle}
         </button>
       </div>
 
@@ -96,7 +97,7 @@ export function PrepareStage() {
         {/* Roster slots */}
         <div className="space-y-2">
           <h3 className="text-sm text-gray-400 font-medium">
-            Your Team <span className="text-gray-600">(top {getMaxTeamSize(round)} battle)</span>
+            {t.yourTeam} <span className="text-gray-600">{t.topNBattle(getMaxTeamSize(round))}</span>
           </h3>
           {roster.map((p, i) => {
             const sprite = p.species ? Sprites.getPokemon(p.species, { gen: 'gen5' }) : null
@@ -149,7 +150,7 @@ export function PrepareStage() {
                         {p.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
                       </div>
                       <div className="text-gray-400 text-xs truncate">
-                        {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ') || 'No moves'}
+                        {p.moves.filter(Boolean).map(m => zhMove(m)).join(', ') || t.noMoves}
                       </div>
                     </div>
                   </div>
@@ -161,7 +162,7 @@ export function PrepareStage() {
           {/* Inventory */}
           {inventory.items.length > 0 && (
             <div className="mt-4">
-              <h3 className="text-sm text-gray-400 font-medium mb-1">Inventory</h3>
+              <h3 className="text-sm text-gray-400 font-medium mb-1">{t.inventory}</h3>
               <div className="space-y-1">
                 {inventory.items.map((item, i) => {
                   const holder = roster.find(p => p.item === item)
@@ -185,6 +186,7 @@ export function PrepareStage() {
         <div className="md:col-span-2">
           {activePokemon?.species ? (
             <PokemonPrepareEditor
+              t={t}
               pokemon={activePokemon}
               slotIndex={activeSlot}
               allowedMoves={allowedMoves}
@@ -206,7 +208,7 @@ export function PrepareStage() {
             />
           ) : (
             <div className="bg-gray-800 rounded-lg p-6 text-center text-gray-500">
-              Select a Pokemon to configure
+              {t.selectPokemonHint}
             </div>
           )}
         </div>
@@ -216,6 +218,7 @@ export function PrepareStage() {
 }
 
 function PokemonPrepareEditor({
+  t,
   pokemon,
   slotIndex,
   allowedMoves,
@@ -229,6 +232,7 @@ function PokemonPrepareEditor({
   onItemChange,
   onEvolve,
 }: {
+  t: Strings
   pokemon: { species: string; ability: string; item: string; moves: string[]; evs: Record<StatID, number>; ivs: Record<StatID, number>; nature: string; level: number; gender: string }
   slotIndex: number
   allowedMoves: string[]
@@ -295,12 +299,12 @@ function PokemonPrepareEditor({
             {pokemon.gender === 'F' && <span className="text-pink-400 ml-1">♀</span>}
           </div>
           <div className="flex items-center gap-2 mt-1">
-            {species.types.map((t: string) => (
+            {species.types.map((tp: string) => (
               <span
-                key={t}
-                className={`${TYPE_COLORS[t] || 'bg-gray-500'} text-white text-xs font-bold px-2 py-0.5 rounded`}
+                key={tp}
+                className={`${TYPE_COLORS[tp] || 'bg-gray-500'} text-white text-xs font-bold px-2 py-0.5 rounded`}
               >
-                {t}
+                {tp}
               </span>
             ))}
           </div>
@@ -310,7 +314,7 @@ function PokemonPrepareEditor({
       {/* Evolution progress */}
       {evoProgress.length > 0 && (
         <div>
-          <label className="block text-xs text-gray-400 mb-1">Evolution</label>
+          <label className="block text-xs text-gray-400 mb-1">{t.evolutionLabel}</label>
           <div className="space-y-2">
             {evoProgress.map((evo) => {
               const evoSprite = Sprites.getPokemon(evo.evoName, { gen: 'gen5' })
@@ -329,7 +333,7 @@ function PokemonPrepareEditor({
                       />
                     )}
                     <span className="text-white text-sm font-medium">{zhPokemon(evo.evoName)}</span>
-                    <span className="text-gray-500 text-xs ml-auto">种族值 {evo.evoBst}</span>
+                    <span className="text-gray-500 text-xs ml-auto">{t.bstShort(evo.evoBst)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-600 rounded-full h-2">
@@ -347,7 +351,7 @@ function PokemonPrepareEditor({
                       onClick={() => onEvolve(slotIndex, evo.evoName)}
                       className="mt-2 w-full bg-green-600 hover:bg-green-500 text-white text-sm font-bold py-1.5 rounded transition-colors"
                     >
-                      Evolve to {evo.evoName}
+                      {t.evolveToFmt(zhPokemon(evo.evoName))}
                     </button>
                   )}
                 </div>
@@ -359,7 +363,7 @@ function PokemonPrepareEditor({
 
       {/* Ability with description */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Ability</label>
+        <label className="block text-xs text-gray-400 mb-1">{t.abilityField}</label>
         <div className="bg-gray-700 rounded px-3 py-2">
           <div className="text-white text-sm font-medium">{zhAbility(pokemon.ability)}</div>
           {(zhAbilityDesc(pokemon.ability) || abilityData?.shortDesc) && (
@@ -370,19 +374,19 @@ function PokemonPrepareEditor({
 
       {/* Nature with description */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Nature</label>
+        <label className="block text-xs text-gray-400 mb-1">{t.natureField}</label>
         <div className="bg-gray-700 rounded px-3 py-2">
           <div className="text-white text-sm font-medium">
-            {pokemon.nature}
+            {t.nature[pokemon.nature] ?? pokemon.nature}
             {natureData && natureData.plus && natureData.minus && (
               <span className="text-xs font-normal ml-2">
-                <span className="text-green-400">+{STAT_LABELS[natureData.plus]}</span>
+                <span className="text-green-400">+{t.statShort[natureData.plus]}</span>
                 {' / '}
-                <span className="text-red-400">-{STAT_LABELS[natureData.minus]}</span>
+                <span className="text-red-400">-{t.statShort[natureData.minus]}</span>
               </span>
             )}
             {natureData && !natureData.plus && (
-              <span className="text-xs font-normal text-gray-500 ml-2">Neutral</span>
+              <span className="text-xs font-normal text-gray-500 ml-2">{t.neutralNature}</span>
             )}
           </div>
         </div>
@@ -390,17 +394,17 @@ function PokemonPrepareEditor({
 
       {/* Item */}
       <SearchSelect
-        label="Held Item"
+        label={t.heldItemField}
         value={pokemon.item}
         options={ownedItems}
         onChange={(item) => onItemChange(slotIndex, item)}
-        placeholder="No item (pick from inventory)"
+        placeholder={t.noItemPlaceholder}
         formatLabel={zhItem}
       />
 
       {/* Moves with descriptions */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Moves</label>
+        <label className="block text-xs text-gray-400 mb-1">{t.movesField}</label>
         <div className="space-y-2">
           {pokemon.moves.map((move, i) => {
             const md = moveDescriptions[i]
@@ -413,16 +417,16 @@ function PokemonPrepareEditor({
                   value={move}
                   options={availableMoves}
                   onChange={(m) => onMoveChange(slotIndex, i, m)}
-                  placeholder={`Move ${i + 1}`}
+                  placeholder={t.movePlaceholder(i + 1)}
                 />
                 {md && (
                   <div className="mt-0.5 px-2 text-xs text-gray-500">
                     {zhMoveDesc(move) || md.shortDesc}
                     <span className="ml-2 text-gray-600">
-                      {md.category === 'Physical' ? '⚔ Physical' : md.category === 'Special' ? '✦ Special' : '◎ Status'}
-                      {md.accuracy === true ? '' : ` · ${md.accuracy}% acc`}
-                      {md.pp ? ` · ${md.pp} PP` : ''}
-                      {md.priority !== 0 ? ` · Priority ${md.priority > 0 ? '+' : ''}${md.priority}` : ''}
+                      {md.category === 'Physical' ? t.catPhysicalIcon : md.category === 'Special' ? t.catSpecialIcon : t.catStatusIcon}
+                      {md.accuracy === true ? '' : ` · ${t.accSuffix(md.accuracy as number)}`}
+                      {md.pp ? ` · ${t.ppSuffix(md.pp)}` : ''}
+                      {md.priority !== 0 ? ` · ${t.prioritySuffix(md.priority)}` : ''}
                     </span>
                   </div>
                 )}
@@ -438,17 +442,17 @@ function PokemonPrepareEditor({
           const evTotal = Object.values(editedEvs).reduce((a, b) => a + b, 0)
           return (
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-gray-400">Stats</label>
+              <label className="text-xs text-gray-400">{t.statsHeader}</label>
               <div className="flex items-center gap-2">
                 <span className={`text-xs font-medium ${evTotal >= 510 ? 'text-red-400' : 'text-gray-400'}`}>
-                  努力值: {evTotal} / 510
+                  {t.evTotalLabel(evTotal, 510)}
                 </span>
                 {evDirty && (
                   <button
                     onClick={onEvSave}
                     className="text-xs px-2 py-0.5 rounded bg-green-600 hover:bg-green-500 text-white font-medium transition-colors"
                   >
-                    保存
+                    {t.saveBtn}
                   </button>
                 )}
               </div>
@@ -458,12 +462,12 @@ function PokemonPrepareEditor({
         <div className="bg-gray-700 rounded overflow-hidden">
           {/* Header row */}
           <div className="grid grid-cols-[3rem_1fr_2.5rem_2rem_5.5rem_3rem] gap-1 px-2 py-1 text-[10px] text-gray-500 border-b border-gray-600">
-            <span>能力</span>
+            <span>{t.colStat}</span>
             <span></span>
-            <span className="text-right">种族值</span>
-            <span className="text-right">个体值</span>
-            <span className="text-center">努力值</span>
-            <span className="text-right">实数值</span>
+            <span className="text-right">{t.colBase}</span>
+            <span className="text-right">{t.colIv}</span>
+            <span className="text-center">{t.colEv}</span>
+            <span className="text-right">{t.colTotal}</span>
           </div>
           {STATS.map((stat) => {
             const ev = editedEvs[stat]
@@ -477,7 +481,7 @@ function PokemonPrepareEditor({
             return (
               <div key={stat} className="grid grid-cols-[3rem_1fr_2.5rem_2rem_5.5rem_3rem] gap-1 items-center px-2 py-0.5 text-xs">
                 <span className={`font-medium ${isPlus ? 'text-green-400' : isMinus ? 'text-red-400' : 'text-gray-400'}`}>
-                  {STAT_LABELS[stat]}
+                  {t.statShort[stat]}
                   {isPlus && '+'}
                   {isMinus && '-'}
                 </span>

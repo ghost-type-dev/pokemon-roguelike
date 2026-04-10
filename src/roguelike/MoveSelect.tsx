@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { getMove } from '../teambuilder/dex-helpers'
 import { zhMove } from '../i18n/zh-helpers'
+import { useT } from '../i18n/strings'
 
 const TYPE_COLORS: Record<string, string> = {
   Normal: 'bg-gray-400', Fire: 'bg-red-500', Water: 'bg-blue-500',
@@ -26,6 +27,7 @@ interface MoveInfo {
 }
 
 export function MoveSelect({ value, options, onChange, placeholder }: MoveSelectProps) {
+  const t = useT()
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [highlightIndex, setHighlightIndex] = useState(0)
@@ -104,7 +106,7 @@ export function MoveSelect({ value, options, onChange, placeholder }: MoveSelect
             </span>
           </span>
         ) : (
-          <span className="text-gray-500">{placeholder || 'Select...'}</span>
+          <span className="text-gray-500">{placeholder || t.selectPlaceholder}</span>
         )}
         {value && (
           <button
@@ -126,7 +128,7 @@ export function MoveSelect({ value, options, onChange, placeholder }: MoveSelect
             onKeyDown={handleKeyDown}
             onBlur={() => setTimeout(() => setIsOpen(false), 150)}
             className="w-full bg-gray-700 text-white px-2 py-1.5 text-sm outline-none border-b border-gray-600"
-            placeholder="Search moves..."
+            placeholder={t.searchMoves}
           />
           <div ref={listRef} className="overflow-y-auto max-h-60">
             {filtered.map((opt, i) => {
@@ -155,7 +157,7 @@ export function MoveSelect({ value, options, onChange, placeholder }: MoveSelect
               )
             })}
             {filtered.length === 0 && (
-              <div className="px-2 py-2 text-sm text-gray-500">No results</div>
+              <div className="px-2 py-2 text-sm text-gray-500">{t.noResults}</div>
             )}
           </div>
         </div>

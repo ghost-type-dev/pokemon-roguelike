@@ -6,8 +6,32 @@ import { BattleStage } from './BattleStage'
 import { RewardStage } from './RewardStage'
 import { GameOverScreen } from './GameOverScreen'
 import { Sprites } from '@pkmn/img'
+import { useT } from '../i18n/strings'
+import { useLanguageStore, useLanguage } from '../i18n/useLanguage'
+
+function LanguageToggle() {
+  const language = useLanguage()
+  const setLanguage = useLanguageStore((s) => s.setLanguage)
+  return (
+    <div className="inline-flex bg-gray-700 rounded overflow-hidden text-xs">
+      <button
+        onClick={() => setLanguage('en')}
+        className={`px-2 py-1 transition-colors ${language === 'en' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}
+      >
+        EN
+      </button>
+      <button
+        onClick={() => setLanguage('zh')}
+        className={`px-2 py-1 transition-colors ${language === 'zh' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}
+      >
+        中
+      </button>
+    </div>
+  )
+}
 
 export function RoguelikePage() {
+  const t = useT()
   const phase = useRoguelikeStore((s) => s.phase)
   const round = useRoguelikeStore((s) => s.round)
   const roster = useRoguelikeStore((s) => s.roster)
@@ -41,30 +65,27 @@ export function RoguelikePage() {
   if (phase === 'idle') {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white">宝可梦 Roguelike</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-white">{t.appTitle}</h2>
+          <LanguageToggle />
+        </div>
         <div className="bg-gray-800 rounded-lg p-6 space-y-4 max-w-lg">
-          <p className="text-gray-300">
-            用初始宝可梦挑战逐渐强大的对手，在每轮战斗之间获得奖励来强化队伍。
-          </p>
+          <p className="text-gray-300">{t.introBlurb}</p>
           <ul className="text-gray-400 text-sm space-y-1 list-disc list-inside">
-            <li>从 6 只候选宝可梦中选 3 只开始冒险</li>
-            <li>队伍规模随轮次增长：3（第1-10轮）、4（第11-20轮）、5（第21-30轮）、6（第31-40轮）</li>
-            <li>所有宝可梦均为 50 级且 IV 全满</li>
-            <li>通关奖励包括道具、TM、努力值和新宝可梦</li>
-            <li>对手强度随轮次递增，共 40 轮</li>
-            <li>战败？可从上一个奖励界面重试</li>
-            <li>通关全部 40 轮，成为冠军！</li>
+            {t.introBullets.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
           </ul>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">AI 难度</label>
+            <label className="block text-xs text-gray-400 mb-1">{t.aiDifficulty}</label>
             <select
               value={aiDifficulty}
               onChange={(e) => setAiDifficulty(e.target.value as 'random' | 'smart')}
               className="bg-gray-700 text-white rounded px-3 py-2 text-sm w-full"
             >
-              <option value="random">简单（随机 AI）</option>
-              <option value="smart">困难（启发式 AI）</option>
+              <option value="random">{t.aiDifficultyEasy}</option>
+              <option value="smart">{t.aiDifficultyHard}</option>
             </select>
           </div>
 
@@ -72,14 +93,14 @@ export function RoguelikePage() {
             onClick={() => startNewRun(aiDifficulty)}
             className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
-            开始新游戏
+            {t.startNewGame}
           </button>
 
           <button
             onClick={() => fileInputRef.current?.click()}
             className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-2 px-6 rounded-lg transition-colors"
           >
-            从文件读取存档
+            {t.loadFromFile}
           </button>
           <input
             ref={fileInputRef}
@@ -91,7 +112,7 @@ export function RoguelikePage() {
 
           {hasSave && (
             <p className="text-xs text-gray-500 text-center">
-              已自动加载上次的存档。
+              {t.autoLoadedHint}
             </p>
           )}
         </div>
@@ -105,7 +126,7 @@ export function RoguelikePage() {
       {phase !== 'game-over' && (
         <div className="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-2">
           <div className="flex items-center gap-4">
-            <span className="text-purple-400 font-bold">Round {round}/40</span>
+            <span className="text-purple-400 font-bold">{t.roundCounter(round, 40)}</span>
             <div className="flex items-center gap-1">
               {roster.map((p, i) => {
                 const sprite = p.species ? Sprites.getPokemon(p.species, { gen: 'gen5' }) : null
@@ -123,21 +144,22 @@ export function RoguelikePage() {
               })}
             </div>
             <span className="text-gray-500 text-xs">
-              {inventory.items.length} 件道具
+              {t.itemsHeld(inventory.items.length)}
             </span>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageToggle />
             <button
               onClick={exportRun}
               className="text-blue-400 hover:text-blue-300 text-xs"
             >
-              保存到文件
+              {t.saveToFile}
             </button>
             <button
               onClick={abandonRun}
               className="text-red-400 hover:text-red-300 text-xs"
             >
-              放弃本局
+              {t.abandonRun}
             </button>
           </div>
         </div>

@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { useBattleStore } from './useBattleStore'
 import { formatLine } from './formatLine'
+import { useLanguage } from '../i18n/useLanguage'
 
 export function BattleLog() {
   const visibleEvents = useBattleStore((s) => s.visibleEvents)
+  const language = useLanguage()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export function BattleLog() {
   }, [visibleEvents])
 
   const lines = visibleEvents
-    .map((e) => formatLine(e.data))
+    .map((e) => formatLine(e.data, language))
     .filter((l): l is NonNullable<typeof l> => l !== null)
 
   return (
@@ -23,7 +25,7 @@ export function BattleLog() {
     >
       {lines.length === 0 && (
         <div className="text-gray-600 text-center mt-8">
-          Battle log will appear here...
+          {language === 'en' ? 'Battle log will appear here...' : '战斗日志将显示在这里……'}
         </div>
       )}
       {lines.map((line, i) => (

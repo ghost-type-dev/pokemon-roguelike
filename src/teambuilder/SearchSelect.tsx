@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useT } from '../i18n/strings'
 
 interface SearchSelectProps {
   label: string
@@ -11,6 +12,7 @@ interface SearchSelectProps {
 }
 
 export function SearchSelect({ label, value, options, onChange, placeholder, disabled, formatLabel }: SearchSelectProps) {
+  const t = useT()
   const fmt = formatLabel ?? ((o: string) => o)
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -71,7 +73,7 @@ export function SearchSelect({ label, value, options, onChange, placeholder, dis
         }}
       >
         <span className={value ? 'text-white' : 'text-gray-500'}>
-          {value ? fmt(value) : (placeholder || 'Select...')}
+          {value ? fmt(value) : (placeholder || t.selectPlaceholder)}
         </span>
         {value && !disabled && (
           <button
@@ -96,7 +98,7 @@ export function SearchSelect({ label, value, options, onChange, placeholder, dis
             onKeyDown={handleKeyDown}
             onBlur={() => setTimeout(() => setIsOpen(false), 150)}
             className="w-full bg-gray-700 text-white px-2 py-1.5 text-sm outline-none border-b border-gray-600"
-            placeholder="Search..."
+            placeholder={t.searchGeneric}
           />
           <div ref={listRef} className="overflow-y-auto max-h-48">
             {filtered.map((opt, i) => (
@@ -115,7 +117,7 @@ export function SearchSelect({ label, value, options, onChange, placeholder, dis
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="px-2 py-2 text-sm text-gray-500">No results</div>
+              <div className="px-2 py-2 text-sm text-gray-500">{t.noResults}</div>
             )}
           </div>
         </div>

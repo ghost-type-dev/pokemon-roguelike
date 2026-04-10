@@ -1,6 +1,7 @@
 import { useBattleStore } from './useBattleStore'
 import { battleManager } from '../engine/BattleManager'
 import { zhPokemon, zhMove } from '../i18n/zh-helpers'
+import { useT } from '../i18n/strings'
 
 const TYPE_COLORS: Record<string, string> = {
   Normal: 'bg-gray-500 hover:bg-gray-400',
@@ -53,6 +54,7 @@ export function MovePanel() {
 }
 
 function MoveSelectionPanel({ request }: { request: any }) {
+  const t = useT()
   const active = request.active[0]
   const pokemon = request.side.pokemon
   const currentPokemon = pokemon[0]
@@ -68,7 +70,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
   return (
     <div className="bg-gray-800 rounded-lg p-4 space-y-3">
       <div className="text-sm text-gray-400">
-        <span className="text-white font-bold">{zhPokemon(currentPokemon.ident.split(': ')[1])}</span> 要做什么？
+        {t.whatWillDoFmt(zhPokemon(currentPokemon.ident.split(': ')[1]))}
       </div>
 
       {/* Moves */}
@@ -96,7 +98,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
 
       {/* Switch options */}
       <div>
-        <div className="text-xs text-gray-500 mb-1">Switch to:</div>
+        <div className="text-xs text-gray-500 mb-1">{t.switchTo}</div>
         <div className="flex gap-2 flex-wrap">
           {pokemon.slice(1).map((poke: any, i: number) => {
             const slot = i + 1
@@ -116,7 +118,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
               >
                 <div className="font-medium">{zhPokemon(poke.ident.split(': ')[1])}</div>
                 <div className="text-xs text-gray-400">
-                  {fainted ? 'Fainted' : `${hp}%`}
+                  {fainted ? t.fainted : `${hp}%`}
                 </div>
               </button>
             )
@@ -128,6 +130,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
 }
 
 function SwitchPanel({ request, forced }: { request: any; forced?: boolean }) {
+  const t = useT()
   const pokemon = request.side.pokemon
 
   const handleSwitch = (slot: number) => {
@@ -137,7 +140,7 @@ function SwitchPanel({ request, forced }: { request: any; forced?: boolean }) {
   return (
     <div className="bg-gray-800 rounded-lg p-4 space-y-3">
       <div className="text-sm text-yellow-400 font-medium">
-        {forced ? 'Choose a Pokemon to send out!' : 'Switch to which Pokemon?'}
+        {forced ? t.forceSwitchPrompt : t.switchPrompt}
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -157,14 +160,14 @@ function SwitchPanel({ request, forced }: { request: any; forced?: boolean }) {
                   : 'bg-gray-700 hover:bg-blue-700 text-white'
               }`}
             >
-              <div className="font-medium text-sm">{poke.ident.split(': ')[1]}</div>
+              <div className="font-medium text-sm">{zhPokemon(poke.ident.split(': ')[1])}</div>
               <div className="text-xs mt-0.5">
                 {isActive ? (
-                  <span className="text-blue-400">Active</span>
+                  <span className="text-blue-400">{t.active}</span>
                 ) : fainted ? (
-                  <span className="text-red-400">Fainted</span>
+                  <span className="text-red-400">{t.fainted}</span>
                 ) : (
-                  <span className="text-gray-400">{hp}% HP</span>
+                  <span className="text-gray-400">{t.hpPctFmt(hp)}</span>
                 )}
               </div>
             </button>

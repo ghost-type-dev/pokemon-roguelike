@@ -3,14 +3,7 @@ import { Sprites } from '@pkmn/img'
 import { useBattleStore } from './useBattleStore'
 import { getGen } from '../teambuilder/dex-helpers'
 import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc } from '../i18n/zh-helpers'
-
-const STAT_LABELS: Record<string, string> = {
-  atk: 'Atk',
-  def: 'Def',
-  spa: 'SpA',
-  spd: 'SpD',
-  spe: 'Spe',
-}
+import { useT } from '../i18n/strings'
 
 
 const TYPE_COLORS: Record<string, string> = {
@@ -54,6 +47,7 @@ function lookupTypes(species: string): string[] {
 }
 
 export function TeamPanel() {
+  const t = useT()
   const teamInfo = useBattleStore((s) => s.teamInfo)
   const status = useBattleStore((s) => s.status)
   const [expandedSlot, setExpandedSlot] = useState<number | null>(null)
@@ -64,7 +58,7 @@ export function TeamPanel() {
 
   return (
     <div className="bg-gray-800 rounded-lg p-3">
-      <h3 className="text-sm font-semibold text-gray-400 mb-2">Your Team</h3>
+      <h3 className="text-sm font-semibold text-gray-400 mb-2">{t.yourTeam}</h3>
       <div className="space-y-1">
         {pokemon.map((poke: any, i: number) => {
           const name = poke.ident.split(': ')[1]
@@ -73,7 +67,7 @@ export function TeamPanel() {
           const gender = details.includes(', M') ? 'M' : details.includes(', F') ? 'F' : ''
           const fainted = poke.condition === '0 fnt' || poke.condition.endsWith(' fnt')
           const hp = parseHP(poke.condition)
-          const hpText = fainted ? 'Fainted' : poke.condition.split(' ')[0]
+          const hpText = fainted ? t.fainted : poke.condition.split(' ')[0]
           const isExpanded = expandedSlot === i
           const sprite = Sprites.getPokemon(species, { gen: 'gen5' })
 
@@ -139,9 +133,9 @@ export function TeamPanel() {
                   {/* Item */}
                   <div>
                     <div>
-                      <span className="text-gray-500">Item: </span>
+                      <span className="text-gray-500">{t.itemColon} </span>
                       <span className="text-amber-300">
-                        {poke.item ? zhItem(poke.item) : 'None'}
+                        {poke.item ? zhItem(poke.item) : t.noneItem}
                       </span>
                     </div>
                     {poke.item && (() => {
@@ -156,7 +150,7 @@ export function TeamPanel() {
                   {/* Ability */}
                   <div>
                     <div>
-                      <span className="text-gray-500">Ability: </span>
+                      <span className="text-gray-500">{t.abilityColon} </span>
                       <span className="text-indigo-300">
                         {zhAbility(poke.ability)}
                       </span>
@@ -172,17 +166,17 @@ export function TeamPanel() {
 
                   {/* Stats */}
                   <div>
-                    <span className="text-gray-500">Stats: </span>
+                    <span className="text-gray-500">{t.statsColon} </span>
                     <span className="text-gray-300">
                       {Object.entries(poke.stats)
-                        .map(([key, val]) => `${STAT_LABELS[key] || key} ${val}`)
+                        .map(([key, val]) => `${t.statShort[key as keyof typeof t.statShort] || key} ${val}`)
                         .join(' / ')}
                     </span>
                   </div>
 
                   {/* Moves */}
                   <div>
-                    <span className="text-gray-500">Moves:</span>
+                    <span className="text-gray-500">{t.movesColon}</span>
                     <div className="space-y-1 mt-1">
                       {poke.moves.map((move: string, j: number) => {
                         const moveData = lookupMove(move)
@@ -192,7 +186,7 @@ export function TeamPanel() {
                               <span className="text-gray-200">{zhMove(moveData?.name || move)}</span>
                               {moveData && (
                                 <span className="text-gray-500">
-                                  {moveData.category !== 'Status' ? `${moveData.basePower} BP` : 'Status'}
+                                  {moveData.category !== 'Status' ? `${moveData.basePower} ${t.bpSuffix}` : t.catStatus}
                                   {' · '}
                                   {moveData.type}
                                 </span>

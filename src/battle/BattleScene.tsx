@@ -3,6 +3,7 @@ import { useBattleStore } from './useBattleStore'
 import { PokemonSprite } from './PokemonSprite'
 import { HPBar } from './HPBar'
 import { formatLine } from './formatLine'
+import { useLanguage } from '../i18n/useLanguage'
 
 interface PokemonState {
   name: string
@@ -207,6 +208,7 @@ function TeamIndicator({ team }: { team: TeamOverview }) {
 }
 
 function TurnNarration({ events }: { events: Array<{ data: string }> }) {
+  const language = useLanguage()
   const lines = useMemo(() => {
     const turnIndices: number[] = []
     for (let i = 0; i < events.length; i++) {
@@ -235,10 +237,10 @@ function TurnNarration({ events }: { events: Array<{ data: string }> }) {
     }
 
     return turnEvents
-      .map((e) => formatLine(e.data))
+      .map((e) => formatLine(e.data, language))
       .filter((l): l is NonNullable<typeof l> => l !== null)
       .filter((l) => !l.className.includes('text-xs'))
-  }, [events])
+  }, [events, language])
 
   const [visibleCount, setVisibleCount] = useState(0)
   const prevLinesRef = useRef(lines)
