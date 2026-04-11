@@ -138,6 +138,9 @@ const en = {
   hpPctFmt: (n: number) => `${n}% HP`,
   forceSwitchPrompt: 'Choose a Pokemon to send out!',
   switchPrompt: 'Switch to which Pokemon?',
+  moveEffSuper: 'Super effective!',
+  moveEffWeak: 'Not very effective',
+  moveEffNone: 'No effect',
 
   // Battle stage header
   generatingOpponent: 'Generating opponent team...',
@@ -312,6 +315,9 @@ const zh: typeof en = {
   hpPctFmt: (n: number) => `HP ${n}%`,
   forceSwitchPrompt: '请派出下一只宝可梦！',
   switchPrompt: '要切换到哪只宝可梦？',
+  moveEffSuper: '效果拔群！',
+  moveEffWeak: '效果不太好',
+  moveEffNone: '没有效果',
 
   // Battle stage header
   generatingOpponent: '正在生成对手队伍……',

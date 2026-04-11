@@ -1,3 +1,24 @@
+const TYPE_BADGE_COLORS: Record<string, string> = {
+  Normal: 'bg-gray-500',
+  Fire: 'bg-red-600',
+  Water: 'bg-blue-600',
+  Electric: 'bg-yellow-500 text-black',
+  Grass: 'bg-green-600',
+  Ice: 'bg-cyan-400 text-black',
+  Fighting: 'bg-red-800',
+  Poison: 'bg-purple-600',
+  Ground: 'bg-yellow-700',
+  Flying: 'bg-indigo-400',
+  Psychic: 'bg-pink-600',
+  Bug: 'bg-lime-600',
+  Rock: 'bg-yellow-800',
+  Ghost: 'bg-purple-800',
+  Dragon: 'bg-indigo-700',
+  Dark: 'bg-gray-800',
+  Steel: 'bg-gray-500',
+  Fairy: 'bg-pink-400 text-black',
+}
+
 interface HPBarProps {
   current: number
   max: number
@@ -5,6 +26,7 @@ interface HPBarProps {
   level?: number
   status?: string
   gender?: string
+  types?: string[]
 }
 
 function getHPColor(percent: number): string {
@@ -26,7 +48,7 @@ function getStatusBadge(status: string | undefined): { text: string; color: stri
   return badges[status] || null
 }
 
-export function HPBar({ current, max, name, level, status, gender }: HPBarProps) {
+export function HPBar({ current, max, name, level, status, gender, types }: HPBarProps) {
   const percent = max > 0 ? Math.max(0, (current / max) * 100) : 0
   const statusBadge = getStatusBadge(status)
 
@@ -51,8 +73,20 @@ export function HPBar({ current, max, name, level, status, gender }: HPBarProps)
           style={{ width: `${percent}%` }}
         />
       </div>
-      <div className="text-gray-400 text-xs text-right mt-0.5">
-        {current}/{max}
+      <div className="flex items-center justify-between mt-0.5">
+        {types && types.length > 0 ? (
+          <div className="flex gap-1">
+            {types.map((t) => (
+              <span
+                key={t}
+                className={`${TYPE_BADGE_COLORS[t] ?? 'bg-gray-500'} text-white text-xs font-semibold px-1.5 py-0.5 rounded`}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        ) : <span />}
+        <span className="text-gray-400 text-xs">{current}/{max}</span>
       </div>
     </div>
   )
