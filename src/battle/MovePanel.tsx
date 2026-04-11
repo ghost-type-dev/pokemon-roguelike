@@ -5,29 +5,8 @@ import { useT } from '../i18n/strings'
 import { Dex } from '@pkmn/dex'
 import { getMove } from '../teambuilder/dex-helpers'
 
-const TYPE_COLORS: Record<string, string> = {
-  Normal: 'bg-gray-500 hover:bg-gray-400',
-  Fire: 'bg-red-600 hover:bg-red-500',
-  Water: 'bg-blue-600 hover:bg-blue-500',
-  Electric: 'bg-yellow-500 hover:bg-yellow-400 text-black',
-  Grass: 'bg-green-600 hover:bg-green-500',
-  Ice: 'bg-cyan-400 hover:bg-cyan-300 text-black',
-  Fighting: 'bg-red-800 hover:bg-red-700',
-  Poison: 'bg-purple-600 hover:bg-purple-500',
-  Ground: 'bg-yellow-700 hover:bg-yellow-600',
-  Flying: 'bg-indigo-400 hover:bg-indigo-300',
-  Psychic: 'bg-pink-600 hover:bg-pink-500',
-  Bug: 'bg-lime-600 hover:bg-lime-500',
-  Rock: 'bg-yellow-800 hover:bg-yellow-700',
-  Ghost: 'bg-purple-800 hover:bg-purple-700',
-  Dragon: 'bg-indigo-700 hover:bg-indigo-600',
-  Dark: 'bg-gray-800 hover:bg-gray-700 border border-gray-600',
-  Steel: 'bg-gray-500 hover:bg-gray-400',
-  Fairy: 'bg-pink-400 hover:bg-pink-300 text-black',
-}
-
-function getMoveColor(type: string): string {
-  return 'bg-gray-700 hover:bg-gray-600' 
+function getMoveColor(): string {
+  return 'bg-gray-700 hover:bg-gray-600'
 }
 
 const TYPE_TAG_COLORS: Record<string, string> = {
@@ -225,7 +204,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
               key={i}
               onClick={() => handleMove(i)}
               disabled={disabled}
-              className={`${disabled ? 'bg-gray-800 opacity-50' : getMoveColor(moveType)} text-white py-1.5 px-3 rounded-lg transition-colors w-full border border-gray-700/50 block text-left`}
+              className={`${disabled ? 'bg-gray-800 opacity-50' : getMoveColor()} text-white py-1.5 px-3 rounded-lg transition-colors w-full border border-gray-700/50 block text-left`}
             >
               <div className="flex items-start gap-3">
                 {/* 左侧等宽属性块 */}

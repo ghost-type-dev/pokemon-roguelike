@@ -1,3 +1,5 @@
+import { zhType } from '../i18n/zh-helpers'
+
 const TYPE_BADGE_COLORS: Record<string, string> = {
   Normal: 'bg-gray-500',
   Fire: 'bg-red-600',
@@ -81,7 +83,7 @@ export function HPBar({ current, max, name, level, status, gender, types }: HPBa
                 key={t}
                 className={`${TYPE_BADGE_COLORS[t] ?? 'bg-gray-500'} text-white text-xs font-semibold px-1.5 py-0.5 rounded`}
               >
-                {t}
+                {zhType(t)}
               </span>
             ))}
           </div>
