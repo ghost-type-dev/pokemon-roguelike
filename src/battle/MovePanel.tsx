@@ -27,7 +27,7 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 function getMoveColor(type: string): string {
-  return TYPE_COLORS[type] || 'bg-gray-600 hover:bg-gray-500'
+  return 'bg-gray-700 hover:bg-gray-600' 
 }
 
 const TYPE_TAG_COLORS: Record<string, string> = {
@@ -198,24 +198,21 @@ function MoveSelectionPanel({ request }: { request: any }) {
         {t.whatWillDoFmt(zhPokemon(currentPokemon.ident.split(': ')[1]))}
       </div>
 
-      {/* Moves */}
-      <div className="space-y-2">
+      {/* 技能列表：space-y-1.5 适中 */}
+      <div className="space-y-1.5">
         {active.moves.map((move: any, i: number) => {
           const disabled = move.disabled
           const pp = move.pp !== undefined ? `${move.pp}/${move.maxpp}` : ''
           const moveData = Dex.moves.get(move.move)
           const moveType = moveData?.type ?? move.type ?? 'Normal'
           const isStatus = moveData?.category === 'Status'
+          
           const eff = (!isStatus && opponentSpecies)
             ? getMoveEffectiveness(moveType, opponentSpecies, opponentAbility)
             : 1
-          const effLabel = eff > 1 ? t.moveEffSuper
-            : eff === 0 ? t.moveEffNone
-            : eff < 1 ? t.moveEffWeak
-            : null
-          const effColor = eff > 1 ? 'text-yellow-300'
-            : eff === 0 ? 'text-gray-500'
-            : 'text-gray-400'
+          const effLabel = eff > 1 ? t.moveEffSuper : eff === 0 ? t.moveEffNone : eff < 1 ? t.moveEffWeak : null
+          const effColor = eff > 1 ? 'text-yellow-300' : eff === 0 ? 'text-gray-500' : 'text-gray-400'
+          
           const dexMove = getMove(move.move)
           const typeTag = dexMove?.type || moveData?.type || 'Normal'
           const basePower = dexMove?.basePower ?? 0
@@ -228,37 +225,48 @@ function MoveSelectionPanel({ request }: { request: any }) {
               key={i}
               onClick={() => handleMove(i)}
               disabled={disabled}
-              className={`${disabled ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : getMoveColor(moveType)} text-white text-sm font-medium py-2 px-3 rounded-lg text-left transition-colors w-full`}
+              className={`${disabled ? 'bg-gray-800 opacity-50' : getMoveColor(moveType)} text-white py-1.5 px-3 rounded-lg transition-colors w-full border border-gray-700/50 block text-left`}
             >
-              <div className="flex items-center justify-between">
-                <div className="font-bold text-sm truncate">{zhMove(move.move)}</div>
-                <div className={`text-xs font-semibold ${effLabel ? effColor : 'invisible'}`}>{effLabel ?? '\u00A0'}</div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-1 text-xs opacity-80">
-                <span className={`${TYPE_TAG_COLORS[typeTag] || 'bg-gray-500'} text-white text-[10px] font-bold px-1 py-0.5 rounded text-center flex-shrink-0`}>
+              <div className="flex items-start gap-3">
+                {/* 左侧等宽属性块 */}
+                <div className={`${TYPE_TAG_COLORS[typeTag] || 'bg-gray-500'} w-12 flex-shrink-0 text-[10px] font-bold py-0.5 mt-0.5 rounded text-center`}>
                   {zhType(typeTag)}
-                </span>
-                <span className="text-gray-300 w-10 text-right flex-shrink-0">{basePower > 0 ? basePower : '—'}</span>
-                <span className="text-gray-400 w-12 text-right flex-shrink-0">{accuracy === true || accuracy === undefined ? '—' : `${accuracy}%`}</span>
-                <span className="text-gray-500 w-10 text-right flex-shrink-0">{category ? zhCategory(category) : ''}</span>
-                <div className="ml-auto text-xs text-gray-500">{pp && `PP ${pp}`}</div>
-              </div>
-
-              {desc && (
-                <div className="text-[11px] text-gray-400 mt-1 pl-[3.25rem] leading-snug">
-                  {desc}
                 </div>
-              )}
+
+                {/* 内容区 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-gray-100">{zhMove(move.move)}</span>
+                      <div className="flex gap-2 text-[10px] text-gray-400">
+                        <span>威:{basePower > 0 ? basePower : '—'}</span>
+                        <span>准:{accuracy === true || accuracy === undefined ? '—' : `${accuracy}%`}</span>
+                        <span>{category ? zhCategory(category) : ''}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-semibold ${effLabel ? effColor : 'hidden'}`}>{effLabel}</span>
+                      <span className="text-[10px] text-gray-400">{pp && `PP ${pp}`}</span>
+                    </div>
+                  </div>
+
+                  {/* 恢复技能介绍：限制行数并减小字号以节省空间 */}
+                  {desc && (
+                    <div className="text-[10px] text-gray-400 mt-0.5 leading-snug line-clamp-1">
+                      {desc}
+                    </div>
+                  )}
+                </div>
+              </div>
             </button>
           )
         })}
       </div>
 
-      {/* Switch options */}
-      <div>
-        <div className="text-xs text-gray-500 mb-1">{t.switchTo}</div>
-        <div className="flex gap-2 flex-wrap">
+      {/* 底部切换区 */}
+      <div className="pt-2 border-t border-gray-700">
+        <div className="flex gap-2">
           {pokemon.slice(1).map((poke: any, i: number) => {
             const slot = i + 1
             const fainted = poke.condition.endsWith(' fnt') || poke.condition === '0 fnt'
@@ -269,16 +277,12 @@ function MoveSelectionPanel({ request }: { request: any }) {
                 key={slot}
                 onClick={() => handleSwitch(slot)}
                 disabled={fainted || poke.active}
-                className={`py-1.5 px-3 rounded text-sm transition-colors ${
-                  fainted || poke.active
-                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-700 hover:bg-gray-600 text-white'
+                className={`flex-1 py-2 px-3 rounded-lg text-sm transition-colors ${
+                  fainted || poke.active ? 'bg-gray-800 text-gray-600' : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }`}
               >
-                <div className="font-medium">{zhPokemon(poke.ident.split(': ')[1])}</div>
-                <div className="text-xs text-gray-400">
-                  {fainted ? t.fainted : `${hp}%`}
-                </div>
+                <div className="font-medium text-center truncate">{zhPokemon(poke.ident.split(': ')[1])}</div>
+                <div className="text-[10px] text-center opacity-60">{fainted ? t.fainted : `${hp}%`}</div>
               </button>
             )
           })}
