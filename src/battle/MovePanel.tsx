@@ -27,7 +27,8 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 function getMoveColor(type: string): string {
-  return TYPE_COLORS[type] || 'bg-gray-600 hover:bg-gray-500'
+  // Use a single uniform color for all move buttons
+  return 'bg-blue-600 hover:bg-blue-500'
 }
 
 const TYPE_TAG_COLORS: Record<string, string> = {
@@ -236,7 +237,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
               </div>
 
               <div className="flex items-center gap-2 mt-1 text-xs opacity-80">
-                <span className={`${TYPE_TAG_COLORS[typeTag] || 'bg-gray-500'} text-white text-[10px] font-bold px-1 py-0.5 rounded text-center flex-shrink-0`}>
+                <span className={`${TYPE_TAG_COLORS[typeTag] || 'bg-blue-400'} text-white text-[10px] font-bold px-1 py-0.5 rounded text-center flex-shrink-0`}>
                   {zhType(typeTag)}
                 </span>
                 <span className="text-gray-300 w-10 text-right flex-shrink-0">{basePower > 0 ? basePower : '—'}</span>
