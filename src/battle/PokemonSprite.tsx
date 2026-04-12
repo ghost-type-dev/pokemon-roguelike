@@ -8,8 +8,9 @@ interface PokemonSpriteProps {
 
 export function PokemonSprite({ species, side, fainted }: PokemonSpriteProps) {
   const isFront = side === 'p2' // opponent faces us
+  const isMega = species.includes('-Mega')
   const spriteData = Sprites.getPokemon(species, {
-    gen: 'gen5ani',
+    gen: isMega ? 'ani' : 'gen5ani',
     side: isFront ? 'p2' : 'p1',
   })
 

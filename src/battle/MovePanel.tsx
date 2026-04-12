@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useBattleStore } from './useBattleStore'
 import { battleManager } from '../engine/BattleManager'
 import { zhPokemon, zhMove, zhType, zhCategory, zhMoveDesc } from '../i18n/zh-helpers'
@@ -163,8 +164,19 @@ function MoveSelectionPanel({ request }: { request: any }) {
   const currentPokemon = pokemon[0]
   const { species: opponentSpecies, ability: opponentAbility } = getOpponentInfo(visibleEvents)
 
+  const canMegaEvo: boolean = !!(active.canMegaEvo || active.canMegaEvoX || active.canMegaEvoY)
+  const [megaArmed, setMegaArmed] = useState(false)
+
+  // Reset mega armed state each new turn (request changes)
+  useEffect(() => {
+    setMegaArmed(false)
+  }, [request.rqid])
+
   const handleMove = (moveIndex: number) => {
-    battleManager.submitHumanChoice(`move ${moveIndex + 1}`)
+    const suffix = megaArmed
+      ? (active.canMegaEvoX ? ' megax' : active.canMegaEvoY ? ' megay' : ' mega')
+      : ''
+    battleManager.submitHumanChoice(`move ${moveIndex + 1}${suffix}`)
   }
 
   const handleSwitch = (slot: number) => {
@@ -176,6 +188,20 @@ function MoveSelectionPanel({ request }: { request: any }) {
       <div className="text-sm text-gray-400">
         {t.whatWillDoFmt(zhPokemon(currentPokemon.ident.split(': ')[1]))}
       </div>
+
+      {/* Mega Evolution toggle */}
+      {canMegaEvo && (
+        <button
+          onClick={() => setMegaArmed((v) => !v)}
+          className={`w-full py-1.5 px-3 rounded-lg text-sm font-bold transition-colors border ${
+            megaArmed
+              ? 'bg-purple-600 border-purple-400 text-white'
+              : 'bg-gray-700 border-purple-500/50 text-purple-300 hover:bg-purple-800'
+          }`}
+        >
+          {megaArmed ? t.megaArmed : t.megaToggle}
+        </button>
+      )}
 
       {/* 技能列表：space-y-1.5 适中 */}
       <div className="space-y-1.5">
