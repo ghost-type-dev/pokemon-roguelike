@@ -6,7 +6,6 @@ import { SearchSelect } from '../teambuilder/SearchSelect'
 import { MoveSelect } from './MoveSelect'
 import { useRoguelikeStore } from './useRoguelikeStore'
 import { getMaxTeamSize, getEvolutionProgress } from './roguelike-helpers'
-import { getMegaStonesForSpecies } from './mega-helpers'
 import { zhPokemon, zhMove, zhItem, zhAbility, zhItemDesc, zhAbilityDesc, zhMoveDesc, zhType } from '../i18n/zh-helpers'
 import { useT, type Strings } from '../i18n/strings'
 import type { StatID } from '@pkmn/data'
@@ -39,14 +38,8 @@ export function PrepareStage() {
     const heldByOthers = new Set(
       roster.filter((_, i) => i !== activeSlot).map(p => p.item).filter(Boolean)
     )
-    const baseItems = inventory.items.filter(item => !heldByOthers.has(item) || item === activePokemon?.item)
-    const megaStones = activePokemon?.species
-      ? getMegaStonesForSpecies(activePokemon.species)
-      : []
-    // Merge mega stones that aren't already in baseItems
-    const extra = megaStones.filter(s => !baseItems.includes(s))
-    return [...baseItems, ...extra]
-  }, [roster, activeSlot, inventory.items, activePokemon?.item, activePokemon?.species])
+    return inventory.items.filter(item => !heldByOthers.has(item) || item === activePokemon?.item)
+  }, [roster, activeSlot, inventory.items, activePokemon?.item])
 
   // Allowed moves = current moves + reward-unlocked moves only
   const allowedMoves = useMemo(() => {
