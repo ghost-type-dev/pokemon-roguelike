@@ -233,7 +233,7 @@ function PokemonPrepareEditor({
   onEvolve,
 }: {
   t: Strings
-  pokemon: { species: string; ability: string; item: string; moves: string[]; evs: Record<StatID, number>; ivs: Record<StatID, number>; nature: string; level: number; gender: string }
+  pokemon: { species: string; ability: string; item: string; moves: string[]; evs: Record<StatID, number>; ivs: Record<StatID, number>; nature: string; level: number; gender: string; teraType?: string }
   slotIndex: number
   allowedMoves: string[]
   ownedItems: string[]
@@ -307,6 +307,11 @@ function PokemonPrepareEditor({
                 {zhType(tp)}
               </span>
             ))}
+            {pokemon.teraType && (
+              <span className={`${TYPE_COLORS[pokemon.teraType] || 'bg-gray-500'} text-white text-xs font-bold px-2 py-0.5 rounded border border-cyan-400/60`}>
+                ◆ {zhType(pokemon.teraType)}
+              </span>
+            )}
           </div>
         </div>
       </div>

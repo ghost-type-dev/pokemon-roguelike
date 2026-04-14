@@ -4,6 +4,22 @@ import { BATTLE_ITEMS, STARTERS, STAT_LABELS, type RewardOption } from './consta
 import { getMissingMegaStoneRewards } from './mega-helpers'
 import type { StatID } from '@pkmn/data'
 
+// ─── Tera Type ──────────────────────────────────────────────────────────────
+
+const ALL_TYPES = [
+  'Normal', 'Fire', 'Water', 'Electric', 'Grass', 'Ice',
+  'Fighting', 'Poison', 'Ground', 'Flying', 'Psychic', 'Bug',
+  'Rock', 'Ghost', 'Dragon', 'Dark', 'Steel', 'Fairy',
+]
+
+/** Pick a default Tera Type from the species' native types */
+export function getDefaultTeraType(speciesName: string): string {
+  const species = getSpecies(speciesName)
+  if (!species) return 'Normal'
+  const types = species.types as string[]
+  return types[Math.floor(Math.random() * types.length)]
+}
+
 // ─── Gender ─────────────────────────────────────────────────────────────────
 
 /** Pick a random gender based on species gender ratio */
@@ -122,6 +138,7 @@ export function createStarterSet(speciesName: string): PokemonSet {
     evs: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
     nature: allNatures()[Math.floor(Math.random() * allNatures().length)].name,
     gender: randomGender(speciesName),
+    teraType: getDefaultTeraType(speciesName),
   }
 }
 
@@ -283,6 +300,9 @@ function generateAIPokemonSet(
     ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
     level: 50,
     gender: randomGender(speciesName),
+    teraType: round >= 25
+      ? ALL_TYPES[Math.floor(Math.random() * ALL_TYPES.length)]
+      : getDefaultTeraType(speciesName),
   }
 }
 
@@ -533,6 +553,22 @@ export function generateRewardOptions(
         label: `Recruit: ${opponent.species}`,
         description: desc,
         pokemonSpecies: opponent.species,
+      })
+    }
+  }
+
+  // 7. Tera Shard — change a Pokemon's Tera Type
+  const teraTarget = roster[Math.floor(Math.random() * roster.length)]
+  if (teraTarget?.species) {
+    const candidates = ALL_TYPES.filter(t => t !== teraTarget.teraType)
+    const newTeraType = candidates[Math.floor(Math.random() * candidates.length)]
+    if (newTeraType) {
+      options.push({
+        type: 'tera-shard',
+        label: `Tera Shard: ${newTeraType}`,
+        description: `Change ${teraTarget.species}'s Tera Type to ${newTeraType}.`,
+        targetSpecies: teraTarget.species,
+        teraType: newTeraType,
       })
     }
   }

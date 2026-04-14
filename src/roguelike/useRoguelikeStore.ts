@@ -10,6 +10,7 @@ import {
   fillAIMoves,
   getEvolutionProgress,
   getMaxTeamSize,
+  getDefaultTeraType,
 } from './roguelike-helpers'
 
 export type RoguelikePhase = 'idle' | 'draft-pick' | 'prepare' | 'battle' | 'reward' | 'game-over'
@@ -337,6 +338,15 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
           }
           break
 
+        case 'tera-shard':
+          if (reward.targetSpecies && reward.teraType) {
+            const idx = roster.findIndex(p => p.species === reward.targetSpecies)
+            if (idx >= 0) {
+              roster[idx] = { ...roster[idx], teraType: reward.teraType }
+            }
+          }
+          break
+
         case 'new-pokemon':
           if (reward.pokemonSpecies) {
             // Keep the opponent's actual set (moves, EVs, nature, etc.) but strip held item
@@ -407,6 +417,13 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
       if (!raw) return false
       const data = JSON.parse(raw)
       if (data.phase === 'idle' || data.phase === 'game-over') return false
+      // Backfill teraType for saves from before terastallize support
+      if (data.roster) {
+        data.roster = data.roster.map((p: PokemonSet) => ({
+          ...p,
+          teraType: p.teraType || (p.species ? getDefaultTeraType(p.species) : ''),
+        }))
+      }
       set(data)
       return true
     } catch (e) {
@@ -446,6 +463,11 @@ export const useRoguelikeStore = create<RoguelikeState>((set, get) => ({
     try {
       const data = JSON.parse(json)
       if (!data.phase || !data.roster) return false
+      // Backfill teraType for imported saves
+      data.roster = data.roster.map((p: PokemonSet) => ({
+        ...p,
+        teraType: p.teraType || (p.species ? getDefaultTeraType(p.species) : ''),
+      }))
       set(data)
       get().saveRun()
       return true
