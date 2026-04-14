@@ -16,6 +16,7 @@ export interface PokemonSet {
   ivs: Record<StatID, number>
   level: number
   gender: '' | 'M' | 'F'
+  teraType?: string
 }
 
 export function createEmptySet(): PokemonSet {
@@ -30,6 +31,7 @@ export function createEmptySet(): PokemonSet {
     ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
     level: 50,
     gender: '',
+    teraType: '',
   }
 }
 

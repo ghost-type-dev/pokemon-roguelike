@@ -115,6 +115,8 @@ const en = {
   rewardNatureDesc: (name: string, nature: string, effect: string) => `Change ${name}'s nature to ${nature} ${effect}.`,
   rewardRecruitReplaceDesc: (name: string) => `Replace a teammate with ${name} from the defeated team.`,
   rewardRecruitJoinDesc: (name: string) => `Add ${name} from the defeated team to your roster.`,
+  rewardTeraShardLabel: (type: string) => `Tera Shard: ${type}`,
+  rewardTeraShardDesc: (name: string, type: string) => `Change ${name}'s Tera Type to ${type}.`,
 
   // Game over
   championTitle: 'Champion!',
@@ -143,6 +145,8 @@ const en = {
   moveEffNone: 'No effect',
   megaToggle: '⬡ Mega Evolve',
   megaArmed: '⬡ Mega Evolve (Armed!)',
+  teraToggleFmt: (type: string) => `◆ Terastallize (${type})`,
+  teraArmedFmt: (type: string) => `◆ Terastallize: ${type} (Armed!)`,
 
   // Battle stage header
   generatingOpponent: 'Generating opponent team...',
@@ -294,6 +298,8 @@ const zh: typeof en = {
   rewardNatureDesc: (name: string, nature: string, effect: string) => `将 ${name} 的性格改为${nature}${effect}。`,
   rewardRecruitReplaceDesc: (name: string) => `用击败队伍中的 ${name} 替换一名队员。`,
   rewardRecruitJoinDesc: (name: string) => `将击败队伍中的 ${name} 加入队伍。`,
+  rewardTeraShardLabel: (type: string) => `太晶碎片：${type}`,
+  rewardTeraShardDesc: (name: string, type: string) => `将 ${name} 的太晶属性变更为${type}。`,
 
   // Game over
   championTitle: '冠军！',
@@ -322,6 +328,8 @@ const zh: typeof en = {
   moveEffNone: '没有效果',
   megaToggle: '⬡ 超级进化',
   megaArmed: '⬡ 超级进化（已蓄势！）',
+  teraToggleFmt: (type: string) => `◆ 太晶化（${type}）`,
+  teraArmedFmt: (type: string) => `◆ 太晶化：${type}（已蓄势！）`,
 
   // Battle stage header
   generatingOpponent: '正在生成对手队伍……',

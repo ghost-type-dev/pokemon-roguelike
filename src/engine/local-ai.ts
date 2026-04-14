@@ -69,7 +69,8 @@ function randomMove(request: any): string {
     ))
     if (canMove.length && (Math.random() < 0.9 || !canSwitch.length)) {
       const move = randomItem(canMove)
-      return `move ${active.moves.indexOf(move) + 1}`
+      const teraSuffix = active.canTerastallize && Math.random() < 0.5 ? ' terastallize' : ''
+      return `move ${active.moves.indexOf(move) + 1}${teraSuffix}`
     }
     if (canSwitch.length) {
       const target = randomItem(canSwitch)
@@ -359,7 +360,16 @@ export class HeuristicAI implements LocalAI {
       }
 
       moveScores.sort((a, b) => b.score - a.score)
-      return `move ${moveScores[0].index}`
+      const bestMove = moveScores[0]
+      // Terastallize when best move type matches tera type and opponent has enough HP to be worth it
+      let teraSuffix = ''
+      if (active.canTerastallize && oppData && oppData.hpPercent > 50) {
+        const bestMoveData = gen.moves.get(active.moves[bestMove.index - 1]?.id)
+        if (bestMoveData && bestMoveData.type === active.canTerastallize) {
+          teraSuffix = ' terastallize'
+        }
+      }
+      return `move ${bestMove.index}${teraSuffix}`
     })
     return choices.join(', ')
   }

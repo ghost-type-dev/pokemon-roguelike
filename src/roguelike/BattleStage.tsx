@@ -23,6 +23,7 @@ function packPokemonSets(sets: PokemonSet[]): string {
     ivs: { ...p.ivs },
     level: p.level || 50,
     gender: p.gender || '',
+    teraType: p.teraType || '',
   }))
   return Teams.pack(showdownSets as any)
 }

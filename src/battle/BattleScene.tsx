@@ -25,6 +25,7 @@ interface PokemonState {
   status: string
   fainted: boolean
   gender: string
+  terastallized: string | null
 }
 
 type TeamMemberStatus = 'alive' | 'fainted' | 'unknown'
@@ -93,6 +94,7 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
         status,
         fainted: false,
         gender,
+        terastallized: null,
       }
 
       if (side === 'p1') { p1 = state; p1Team.activeName = species }
@@ -169,6 +171,14 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
       const side = ident.startsWith('p1') ? 'p1' : 'p2'
       const target = side === 'p1' ? p1 : p2
       if (target) target.status = ''
+    }
+
+    if (type === '-terastallize') {
+      const ident = parts[1] || ''
+      const teraType = parts[2] || ''
+      const side = ident.startsWith('p1') ? 'p1' : 'p2'
+      const target = side === 'p1' ? p1 : p2
+      if (target) target.terastallized = teraType
     }
   }
 
@@ -334,15 +344,20 @@ export function BattleScene() {
           <TeamIndicator team={p2Team} />
         </div>
         {p2 && (
-          <HPBar
-            name={zhPokemon(p2.name)}
-            current={p2.hp}
-            max={p2.maxHp}
-            level={p2.level}
-            status={p2.status}
-            gender={p2.gender}
-            types={Dex.species.get(p2.species)?.types}
-          />
+          <>
+            <HPBar
+              name={zhPokemon(p2.name)}
+              current={p2.hp}
+              max={p2.maxHp}
+              level={p2.level}
+              status={p2.status}
+              gender={p2.gender}
+              types={Dex.species.get(p2.species)?.types}
+            />
+            {p2.terastallized && (
+              <div className="text-xs text-cyan-300 font-bold mt-0.5 text-right">◆ Tera: {p2.terastallized}</div>
+            )}
+          </>
         )}
       </div>
       <div className="absolute top-20 right-16">
@@ -358,15 +373,20 @@ export function BattleScene() {
           <TeamIndicator team={p1Team} />
         </div>
         {p1 && (
-          <HPBar
-            name={zhPokemon(p1.name)}
-            current={p1.hp}
-            max={p1.maxHp}
-            level={p1.level}
-            status={p1.status}
-            gender={p1.gender}
-            types={Dex.species.get(p1.species)?.types}
-          />
+          <>
+            <HPBar
+              name={zhPokemon(p1.name)}
+              current={p1.hp}
+              max={p1.maxHp}
+              level={p1.level}
+              status={p1.status}
+              gender={p1.gender}
+              types={Dex.species.get(p1.species)?.types}
+            />
+            {p1.terastallized && (
+              <div className="text-xs text-cyan-300 font-bold mt-0.5">◆ Tera: {p1.terastallized}</div>
+            )}
+          </>
         )}
       </div>
       <div className="absolute bottom-4 left-16">

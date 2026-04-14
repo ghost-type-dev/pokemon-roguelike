@@ -24,6 +24,8 @@ function getRewardLabel(reward: RewardOption, t: Strings): string {
       return reward.natureName ? t.rewardNatureLabel(t.nature[reward.natureName] ?? reward.natureName) : reward.label
     case 'new-pokemon':
       return reward.pokemonSpecies ? t.rewardRecruitLabel(zhPokemon(reward.pokemonSpecies)) : reward.label
+    case 'tera-shard':
+      return reward.teraType ? t.rewardTeraShardLabel(zhType(reward.teraType)) : reward.label
     default:
       return reward.label
   }
@@ -60,6 +62,10 @@ function getRewardDesc(reward: RewardOption, t: Strings): string {
       return reward.description.includes('Replace')
         ? t.rewardRecruitReplaceDesc(zhPokemon(reward.pokemonSpecies))
         : t.rewardRecruitJoinDesc(zhPokemon(reward.pokemonSpecies))
+    case 'tera-shard':
+      return reward.targetSpecies && reward.teraType
+        ? t.rewardTeraShardDesc(zhPokemon(reward.targetSpecies), zhType(reward.teraType))
+        : reward.description
     default:
       return reward.description
   }
@@ -117,7 +123,7 @@ export function RewardStage() {
 
   const handleSelectReward = async (reward: RewardOption) => {
     // EV boost and nature change are fixed — apply directly
-    if (reward.type === 'ev-boost' || reward.type === 'nature') {
+    if (reward.type === 'ev-boost' || reward.type === 'nature' || reward.type === 'tera-shard') {
       applyReward(reward)
       return
     }
@@ -224,7 +230,7 @@ export function RewardStage() {
                 {extraDesc && (
                   <p className="text-gray-500 text-xs mt-1 italic">{extraDesc}</p>
                 )}
-                {(reward.type === 'ev-boost' || reward.type === 'nature') && reward.targetSpecies && (
+                {(reward.type === 'ev-boost' || reward.type === 'nature' || reward.type === 'tera-shard') && reward.targetSpecies && (
                   <div className="flex items-center gap-2 mt-2">
                     {(() => {
                       const sprite = Sprites.getPokemon(reward.targetSpecies, { gen: 'gen5' })

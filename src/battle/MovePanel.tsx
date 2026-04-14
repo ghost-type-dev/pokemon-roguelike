@@ -165,16 +165,29 @@ function MoveSelectionPanel({ request }: { request: any }) {
   const { species: opponentSpecies, ability: opponentAbility } = getOpponentInfo(visibleEvents)
 
   const canMegaEvo: boolean = !!(active.canMegaEvo || active.canMegaEvoX || active.canMegaEvoY)
+  const canTera: string | false = active.canTerastallize || false
   const [megaArmed, setMegaArmed] = useState(false)
+  const [teraArmed, setTeraArmed] = useState(false)
 
-  // Reset mega armed state each new turn (request changes)
+  // Reset armed states each new turn (request changes)
   useEffect(() => {
     setMegaArmed(false)
+    setTeraArmed(false)
   }, [request.rqid])
+
+  const armMega = () => {
+    setMegaArmed(v => !v)
+    setTeraArmed(false)
+  }
+  const armTera = () => {
+    setTeraArmed(v => !v)
+    setMegaArmed(false)
+  }
 
   const handleMove = (moveIndex: number) => {
     const suffix = megaArmed
       ? (active.canMegaEvoX ? ' megax' : active.canMegaEvoY ? ' megay' : ' mega')
+      : teraArmed ? ' terastallize'
       : ''
     battleManager.submitHumanChoice(`move ${moveIndex + 1}${suffix}`)
   }
@@ -192,7 +205,7 @@ function MoveSelectionPanel({ request }: { request: any }) {
       {/* Mega Evolution toggle */}
       {canMegaEvo && (
         <button
-          onClick={() => setMegaArmed((v) => !v)}
+          onClick={armMega}
           className={`w-full py-1.5 px-3 rounded-lg text-sm font-bold transition-colors border ${
             megaArmed
               ? 'bg-purple-600 border-purple-400 text-white'
@@ -200,6 +213,20 @@ function MoveSelectionPanel({ request }: { request: any }) {
           }`}
         >
           {megaArmed ? t.megaArmed : t.megaToggle}
+        </button>
+      )}
+
+      {/* Terastallize toggle */}
+      {canTera && (
+        <button
+          onClick={armTera}
+          className={`w-full py-1.5 px-3 rounded-lg text-sm font-bold transition-colors border ${
+            teraArmed
+              ? 'bg-cyan-600 border-cyan-400 text-white'
+              : 'bg-gray-700 border-cyan-500/50 text-cyan-300 hover:bg-cyan-800'
+          }`}
+        >
+          {teraArmed ? t.teraArmedFmt(canTera) : t.teraToggleFmt(canTera)}
         </button>
       )}
 

@@ -36,7 +36,7 @@ export const BATTLE_ITEMS: string[] = [
   'Wide Lens', 'Zoom Lens', 'Bright Powder', 'Quick Claw',
 ]
 
-export type RewardType = 'item' | 'tm' | 'ability' | 'ev-boost' | 'new-pokemon' | 'nature'
+export type RewardType = 'item' | 'tm' | 'ability' | 'ev-boost' | 'new-pokemon' | 'nature' | 'tera-shard'
 
 export interface RewardOption {
   type: RewardType
@@ -54,6 +54,8 @@ export interface RewardOption {
   natureName?: string
   /** For new-pokemon when roster is full: index of Pokemon to replace */
   replaceIndex?: number
+  /** For tera-shard: the new Tera Type */
+  teraType?: string
 }
 
 export const STAT_LABELS: Record<StatID, string> = {
