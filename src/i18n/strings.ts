@@ -160,6 +160,8 @@ const en = {
   movesColon: 'Moves:',
   noneItem: 'None',
   bpSuffix: 'BP',
+  movePow: 'Pow',
+  moveAcc: 'Acc',
 
   // Search
   searchMoves: 'Search moves...',
@@ -337,6 +339,8 @@ const zh: typeof en = {
   movesColon: '招式：',
   noneItem: '无',
   bpSuffix: '威力',
+  movePow: '威',
+  moveAcc: '准',
 
   // Search
   searchMoves: '搜索招式……',

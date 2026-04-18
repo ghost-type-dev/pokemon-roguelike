@@ -218,8 +218,8 @@ function MoveSelectionPanel({ request }: { request: any }) {
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm text-gray-100">{zhMove(move.move)}</span>
                       <div className="flex gap-2 text-[10px] text-gray-400">
-                        <span>威:{basePower > 0 ? basePower : '—'}</span>
-                        <span>准:{accuracy === true || accuracy === undefined ? '—' : `${accuracy}%`}</span>
+                        <span>{t.movePow}:{basePower > 0 ? basePower : '—'}</span>
+                        <span>{t.moveAcc}:{accuracy === true || accuracy === undefined ? '—' : `${accuracy}%`}</span>
                         <span>{category ? zhCategory(category) : ''}</span>
                       </div>
                     </div>
