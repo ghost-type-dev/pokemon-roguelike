@@ -1,6 +1,7 @@
 import { getGen, getSpecies, getAbilities, getRegularAbilities, allNatures } from '../teambuilder/dex-helpers'
 import { createEmptySet, type PokemonSet } from '../teambuilder/useTeamBuilder'
 import { BATTLE_ITEMS, STARTERS, STAT_LABELS, type RewardOption } from './constants'
+import { getMissingMegaStoneRewards } from './mega-helpers'
 import type { StatID } from '@pkmn/data'
 
 // ─── Gender ─────────────────────────────────────────────────────────────────
@@ -443,9 +444,14 @@ export function generateRewardOptions(
   const options: RewardOption[] = []
 
   // 1. Item reward
+  const megaStoneCandidates = getMissingMegaStoneRewards(roster, inventory.items)
   const availableItems = BATTLE_ITEMS.filter(i => !inventory.items.includes(i))
-  if (availableItems.length > 0) {
-    const item = availableItems[Math.floor(Math.random() * availableItems.length)]
+  const itemPool = megaStoneCandidates.length > 0 && Math.random() < 0.25
+    ? megaStoneCandidates
+    : availableItems
+
+  if (itemPool.length > 0) {
+    const item = itemPool[Math.floor(Math.random() * itemPool.length)]
     options.push({
       type: 'item',
       label: `Item: ${item}`,

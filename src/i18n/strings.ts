@@ -141,6 +141,8 @@ const en = {
   moveEffSuper: 'Super effective!',
   moveEffWeak: 'Not very effective',
   moveEffNone: 'No effect',
+  megaToggle: '⬡ Mega Evolve',
+  megaArmed: '⬡ Mega Evolve (Armed!)',
 
   // Battle stage header
   generatingOpponent: 'Generating opponent team...',
@@ -320,6 +322,8 @@ const zh: typeof en = {
   moveEffSuper: '效果拔群！',
   moveEffWeak: '效果不太好',
   moveEffNone: '没有效果',
+  megaToggle: '⬡ 超级进化',
+  megaArmed: '⬡ 超级进化（已蓄势！）',
 
   // Battle stage header
   generatingOpponent: '正在生成对手队伍……',

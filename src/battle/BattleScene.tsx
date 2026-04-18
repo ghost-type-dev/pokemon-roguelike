@@ -146,6 +146,17 @@ function parseActiveState(events: Array<{ data: string }>): ParsedBattleState {
       }
     }
 
+    if (type === '-formechange' || type === 'detailschange') {
+      const ident = parts[1] || ''
+      const details = parts[2] || ''
+      const side = ident.startsWith('p1') ? 'p1' : 'p2'
+      const newSpecies = details.split(',')[0].trim()
+      const target = side === 'p1' ? p1 : p2
+      if (target && newSpecies) {
+        target.species = newSpecies
+      }
+    }
+
     if (type === '-status') {
       const ident = parts[1] || ''
       const side = ident.startsWith('p1') ? 'p1' : 'p2'

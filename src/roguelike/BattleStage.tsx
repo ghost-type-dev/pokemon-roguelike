@@ -74,7 +74,7 @@ export function BattleStage() {
         p2Name: `Round ${round} Boss`,
       })
       await battleManager.startBattleWithTeams({
-        formatId: 'gen9anythinggoes',
+        formatId: 'gen9nationaldexag',
         p1AI: 'human',
         p2AI: aiDifficulty === 'smart' ? 'heuristic' : 'random',
         p1Name: 'Player',
